@@ -5,7 +5,7 @@
     "behavior": "chase",
     "color": "#ef476f",
     "hp": 14,
-    "speed": 72,
+    "speed": 80,
     "damage": 8,
     "radius": 12,
     "xp": 1,
@@ -15,7 +15,10 @@
     "id": "wisp",
     "name": "Feu follet",
     "behavior": "zigzag",
-    "behaviorParams": { "amplitude": 0.9, "frequency": 3 },
+    "behaviorParams": {
+      "amplitude": 0.9,
+      "frequency": 3
+    },
     "color": "#ff9f1c",
     "hp": 8,
     "speed": 125,
@@ -28,7 +31,13 @@
     "id": "charger",
     "name": "Chargeur",
     "behavior": "charge",
-    "behaviorParams": { "range": 280, "windup": 0.6, "chargeSpeed": 360, "chargeDuration": 0.65, "cooldown": 2.2 },
+    "behaviorParams": {
+      "range": 280,
+      "windup": 0.6,
+      "chargeSpeed": 360,
+      "chargeDuration": 0.65,
+      "cooldown": 2.2
+    },
     "color": "#06d6a0",
     "hp": 26,
     "speed": 58,
@@ -54,9 +63,15 @@
     "id": "warden",
     "name": "Gardien déchu",
     "behavior": "charge",
-    "behaviorParams": { "range": 420, "windup": 0.9, "chargeSpeed": 420, "chargeDuration": 0.8, "cooldown": 3.2 },
+    "behaviorParams": {
+      "range": 420,
+      "windup": 0.9,
+      "chargeSpeed": 420,
+      "chargeDuration": 0.8,
+      "cooldown": 3.2
+    },
     "color": "#f15bb5",
-    "hp": 1100,
+    "hp": 800,
     "speed": 62,
     "damage": 28,
     "radius": 40,

@@ -2,9 +2,16 @@
   "version": 1,
   "run": {
     "upgradeChoices": 3,
-    "xpCurve": { "base": 5, "growth": 1.35, "flat": 2 },
-    "maxEnemies": 260,
-    "spawnRadius": { "min": 560, "max": 720 },
+    "xpCurve": {
+      "base": 4,
+      "growth": 1.28,
+      "flat": 2
+    },
+    "maxEnemies": 200,
+    "spawnRadius": {
+      "min": 560,
+      "max": 720
+    },
     "despawnRadius": 1500,
     "invulnerabilityAfterHit": 0.45,
     "survivalScorePerSecond": 2,
