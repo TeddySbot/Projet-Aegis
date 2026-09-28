@@ -50,7 +50,7 @@ export class CombatSystem extends GameSystem {
     if (!player.alive || player.invulnerable > 0) return;
     for (const e of enemies) {
       if (e.dead || !circlesOverlap(player, player.radius, e, e.radius)) continue;
-      const amount = Math.max(1, Math.round(e.def.damage - player.stats.get('armor')));
+      const amount = Math.max(1, Math.round(e.damage - player.stats.get('armor')));
       player.hp = Math.max(0, player.hp - amount);
       player.invulnerable = this._iframes;
       this.bus.emit(GameEvents.PLAYER_DAMAGED, { amount, hp: player.hp, maxHp: player.maxHp, source: e.typeId });

@@ -21,6 +21,7 @@
   "rewards": {
     "shardsPerScore": 0.004,
     "victoryBonus": 15,
+    "endlessBossKillBonus": 12,
     "minShards": 1
   },
   "systems": {

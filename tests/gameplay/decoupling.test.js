@@ -13,11 +13,11 @@ import { loadContent } from '../helpers.js';
 
 const content = await loadContent();
 
-function play(disabled, seconds) {
+function play(disabled, seconds, mode = 'story') {
   const errors = [];
   const bus = new EventBus({ onError: (err, event) => errors.push(`${event}: ${err.message}`) });
   let run;
-  run = new Run({ content, bus, input: new AutopilotInput({ getWorld: () => run.world }), rng: new Random(11), disabled });
+  run = new Run({ content, bus, input: new AutopilotInput({ getWorld: () => run.world }), rng: new Random(11), disabled, mode });
   bus.on(GameEvents.UPGRADE_CHOICES_OFFERED, ({ choices }) => queueMicrotask(() => bus.emit(GameEvents.UPGRADE_CHOSEN, { upgradeId: choices[0].id })));
   run.start();
   return { run, bus, errors, steps: seconds * 60 };
@@ -52,8 +52,9 @@ test('les systèmes requis ne peuvent pas être désactivés', () => {
   assert.deepEqual([...ctx.run.systems.keys()].filter((k) => ['player', 'combat', 'director'].includes(k)).length, 3);
 });
 
-test('dispose() libère tous les abonnements de la run', async () => {
-  const ctx = play([], 10);
+for (const mode of ['story', 'endless'])
+test(`dispose() libère tous les abonnements de la run (mode ${mode})`, async () => {
+  const ctx = play([], 10, mode);
   await advance(ctx);
   ctx.run.dispose();
   for (const event of Object.values(GameEvents)) {

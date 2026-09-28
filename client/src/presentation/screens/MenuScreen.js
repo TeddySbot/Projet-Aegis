@@ -1,81 +1,106 @@
 import { h, formatTime } from '../dom.js';
 import { Screen } from './Screen.js';
 
-/** Menu principal : lancement de run, boutique de méta-progression, statistiques. */
+/**
+ * Écran titre : les deux modes de jeu présentés côte à côte (campagne / infini),
+ * accès au Sanctuaire et statistiques du profil. Vue « bête » : aucune logique de
+ * navigation, uniquement des callbacks fournis par le MenuState.
+ */
 export class MenuScreen extends Screen {
   constructor({ root }) {
     super({ root, className: 'menu-screen' });
   }
 
   /**
-   * @param {{ profile: any, shop: any[], storageLabel: string, message?: string }} view
-   * @param {{ onStart: () => void, onBuy: (id: string) => void, onReset: () => void }} actions
+   * @param {{ profile: any, storageLabel: string, affordable: number,
+   *   modes: ReturnType<typeof import('../../app/modeSummaries.js').describeModes> }} view
+   * @param {{ onStart: (mode: 'story'|'endless') => void, onOpenSanctuary: () => void }} actions
    */
   render(view, actions) {
-    const { profile, shop, storageLabel, message } = view;
+    const { profile, storageLabel, affordable, modes } = view;
     const s = profile.stats;
-    let resetArmed = false;
-    const resetBtn = h('button.link-btn', {
-      text: 'Réinitialiser la progression',
-      onclick: () => {
-        if (!resetArmed) {
-          resetArmed = true;
-          resetBtn.textContent = 'Cliquer à nouveau pour confirmer';
-          return;
-        }
-        actions.onReset();
-      },
+    const fr = (n) => Number(n ?? 0).toLocaleString('fr-FR');
+
+    const story = modeCard({
+      theme: 'story',
+      icon: '⛨',
+      kicker: 'Campagne',
+      title: 'Le siège d’Égide',
+      text: `Survivez à ${modes.story.waves} vagues, puis abattez le boss final${modes.story.bossName ? ` : ${modes.story.bossName}` : ''}. Une run courte et complète.`,
+      facts: [`${modes.story.waves} vagues`, `Boss : ${modes.story.bossName ?? '—'}`, `≈ ${modes.story.minutes} min`],
+      records: [
+        ['Victoires', fr(s.victories)],
+        ['Meilleur score', fr(s.bestScore)],
+      ],
+      button: 'Lancer la campagne',
+      key: 'Entrée',
+      onPlay: () => actions.onStart('story'),
+    });
+
+    const e = modes.endless;
+    const endless = modeCard({
+      theme: 'endless',
+      icon: '∞',
+      kicker: 'Mode infini',
+      title: 'L’Ascension sans fin',
+      text: e.description,
+      facts: [
+        `Vagues de ${e.waveDuration} s`,
+        `Boss toutes les ${e.bossEvery} vagues`,
+        `${formatTime(e.bossTimeLimit)} pour l’abattre`,
+        e.uncapped ? 'Améliorations sans limite' : null,
+      ],
+      records: [
+        ['Record', s.bestEndlessWave ? `Vague ${s.bestEndlessWave}` : '—'],
+        ['Boss vaincus', fr(s.endlessBossKills)],
+      ],
+      button: 'Entrer dans l’infini',
+      key: 'I',
+      onPlay: () => actions.onStart('endless'),
     });
 
     this.el.replaceChildren(
-      h('div.menu-layout', {}, [
-        h('header.menu-title', {}, [
-          h('div.logo', { text: '⛨' }),
+      h('div.title-page', {}, [
+        h('header.hero', {}, [
+          h('div.logo', { text: '⛨', 'aria-hidden': 'true' }),
           h('h1', { text: 'AEGIS' }),
-          h('p.tagline', { text: 'Survivez aux vagues. Terrassez le Gardien déchu. Devenez plus fort à chaque run.' }),
-          h('button.primary', { text: 'Lancer une run', onclick: actions.onStart }),
-          h('p.controls', { text: 'Déplacement : ZQSD / WASD / flèches · Les armes tirent seules · Échap : pause' }),
+          h('p.tagline', { text: 'Tenez la ligne face aux ombres. Chaque run vous rend plus fort.' }),
         ]),
-        h('div.menu-panel', {}, [
-          h('div.panel-head', {}, [
-            h('h2', { text: 'Sanctuaire' }),
-            h('div.shards', { title: 'Éclats d\'Égide : monnaie persistante gagnée à chaque run' }, [h('span', { text: '◆ ' }), h('strong', { text: String(profile.shards) }), ' éclats']),
+        h('div.mode-grid', {}, [story, endless]),
+        h('div.menu-bar', {}, [
+          h('button.sanctuary-btn', { onclick: actions.onOpenSanctuary, 'aria-label': 'Ouvrir le Sanctuaire' }, [
+            h('span.sanctuary-icon', { text: '✧' }),
+            h('span.sanctuary-label', {}, [h('strong', { text: 'Sanctuaire' }), h('small', { text: 'Améliorations permanentes' })]),
+            h('span.shards-pill', {}, [h('span', { text: '◆' }), h('strong', { text: fr(profile.shards) })]),
+            affordable > 0 ? h('span.badge', { text: String(affordable), title: `${affordable} amélioration(s) achetable(s)` }) : null,
           ]),
-          message ? h('p.menu-message', { text: message }) : null,
-          h(
-            'div.shop',
-            {},
-            shop.map((item) =>
-              h('article.shop-item' + (item.cost === null ? '.maxed' : ''), {}, [
-                h('div.shop-info', {}, [
-                  h('h3', { text: item.name }),
-                  h('p', { text: item.description }),
-                  h('div.pips', {}, Array.from({ length: item.maxLevel }, (_, i) => h('span.pip' + (i < item.level ? '.on' : '')))),
-                ]),
-                h(
-                  'button.buy',
-                  {
-                    disabled: !item.affordable,
-                    onclick: () => actions.onBuy(item.id),
-                    'aria-label': `Acheter ${item.name}`,
-                  },
-                  item.cost === null ? 'MAX' : [h('span', { text: '◆ ' }), String(item.cost)],
-                ),
-              ]),
-            ),
-          ),
-          h('div.stats', {}, [
-            stat('Runs', s.runs),
-            stat('Victoires', s.victories),
-            stat('Meilleur score', s.bestScore.toLocaleString('fr-FR')),
+          h('div.profile-stats', {}, [
+            stat('Runs', fr(s.runs)),
+            stat('Éliminations', fr(s.totalKills)),
             stat('Plus longue survie', formatTime(s.bestTime)),
-            stat('Éliminations', s.totalKills.toLocaleString('fr-FR')),
           ]),
-          h('footer.menu-foot', {}, [h('span', { text: `Sauvegarde : ${storageLabel}` }), resetBtn]),
+        ]),
+        h('footer.title-foot', {}, [
+          h('span', { text: 'ZQSD / WASD / flèches · les armes tirent seules · Échap : pause · S : Sanctuaire' }),
+          h('span', { text: `Sauvegarde : ${storageLabel}` }),
         ]),
       ]),
     );
   }
+}
+
+function modeCard({ theme, icon, kicker, title, text, facts, records, button, key, onPlay }) {
+  return h(`article.mode-card.${theme}`, {}, [
+    h('div.mode-glow', { 'aria-hidden': 'true' }),
+    h('div.mode-head', {}, [
+      h('span.mode-icon', { text: icon, 'aria-hidden': 'true' }),
+      h('div', {}, [h('p.mode-kicker', { text: kicker }), h('h2', { text: title })]),
+    ]),
+    h('p.mode-text', { text }),
+    h('ul.mode-facts', {}, facts.filter(Boolean).map((f) => h('li', { text: f }))),
+    h('div.mode-records', {}, records.map(([label, value]) => h('div', {}, [h('span', { text: label }), h('strong', { text: value })]))),
+    h('button.mode-play', { onclick: onPlay }, [h('span', { text: button }), h('kbd', { text: key })]),
+  ]);
 }
 
 const stat = (label, value) => h('div.stat', {}, [h('span', { text: label }), h('strong', { text: String(value) })]);

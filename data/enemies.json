@@ -79,5 +79,19 @@
     "score": 1500,
     "boss": true,
     "knockbackResistance": 0.95
+  },
+  {
+    "id": "abyss_titan",
+    "name": "Titan abyssal",
+    "behavior": "chase",
+    "color": "#7b2cbf",
+    "hp": 1000,
+    "speed": 58,
+    "damage": 32,
+    "radius": 46,
+    "xp": 60,
+    "score": 2500,
+    "boss": true,
+    "knockbackResistance": 0.97
   }
 ]

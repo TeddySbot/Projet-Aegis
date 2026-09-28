@@ -157,5 +157,21 @@ test('RunDirector : agrège le résumé à partir des seuls événements', () =>
   bus.emit(E.LEVEL_UP, { level: 4 });
   bus.emit(E.PLAYER_DIED, {});
   bus.emit(E.PLAYER_DIED, {}); // idempotent
-  assert.deepEqual(summary, { outcome: 'defeat', duration: 2.1, score: 77, kills: 1, level: 4, wave: 2 });
+  assert.deepEqual(summary, { mode: 'story', outcome: 'defeat', cause: 'death', duration: 2.1, score: 77, kills: 1, level: 4, wave: 2, bossKills: 0 });
+});
+
+test('Arsenal : les bonus méta d\'arme s\'appliquent aussi à une arme obtenue en cours de run', async () => {
+  const content = await loadContent();
+  const bus = new EventBus();
+  const player = new Player({ def: content.player });
+  const arsenal = new Arsenal({
+    bus,
+    weapons: content.weapons,
+    weaponModifiers: [{ weapon: 'nova', stat: 'damage', op: 'mul', value: 0.5, source: 'meta' }],
+  });
+  const base = content.weapons.find((w) => w.id === 'nova').stats.damage;
+  arsenal.grant(player, 'arcane_bolt');
+  assert.equal(player.weapons.get('arcane_bolt').stats.get('damage'), content.weapons.find((w) => w.id === 'arcane_bolt').stats.damage);
+  arsenal.grant(player, 'nova');
+  assert.equal(player.weapons.get('nova').stats.get('damage'), base * 1.5);
 });

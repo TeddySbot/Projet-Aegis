@@ -15,6 +15,7 @@
     "icon": "⏱",
     "weight": 8,
     "maxStacks": 5,
+    "hardMaxStacks": 9,
     "effects": [{ "type": "stat", "stat": "cooldownReduction", "op": "add", "value": 0.08 }]
   },
   {
@@ -24,6 +25,7 @@
     "icon": "👟",
     "weight": 7,
     "maxStacks": 4,
+    "hardMaxStacks": 10,
     "effects": [{ "type": "stat", "stat": "moveSpeed", "op": "mul", "value": 0.1 }]
   },
   {
@@ -45,6 +47,7 @@
     "icon": "➶",
     "weight": 5,
     "maxStacks": 3,
+    "hardMaxStacks": 12,
     "effects": [{ "type": "stat", "stat": "extraProjectiles", "op": "add", "value": 1 }]
   },
   {
@@ -54,6 +57,7 @@
     "icon": "🧲",
     "weight": 6,
     "maxStacks": 3,
+    "hardMaxStacks": 8,
     "effects": [{ "type": "stat", "stat": "pickupRadius", "op": "mul", "value": 0.4 }]
   },
   {
@@ -72,6 +76,7 @@
     "icon": "🎯",
     "weight": 5,
     "maxStacks": 4,
+    "hardMaxStacks": 12,
     "effects": [{ "type": "stat", "stat": "critChance", "op": "add", "value": 0.08 }]
   },
   {
@@ -100,6 +105,7 @@
     "icon": "✧",
     "weight": 6,
     "maxStacks": 3,
+    "hardMaxStacks": 14,
     "requires": { "weapon": "orbit_blades" },
     "effects": [{ "type": "weaponStat", "weapon": "orbit_blades", "stat": "count", "op": "add", "value": 1 }]
   },
@@ -135,5 +141,42 @@
     "maxStacks": 3,
     "requires": { "weapon": "arcane_bolt" },
     "effects": [{ "type": "weaponStat", "weapon": "arcane_bolt", "stat": "pierce", "op": "add", "value": 1 }]
+  },
+  {
+    "id": "bolt_power",
+    "name": "Traits affûtés",
+    "description": "+20 % de dégâts des traits arcaniques.",
+    "icon": "✴",
+    "weight": 5,
+    "maxStacks": 4,
+    "requires": { "weapon": "arcane_bolt" },
+    "effects": [{ "type": "weaponStat", "weapon": "arcane_bolt", "stat": "damage", "op": "mul", "value": 0.2 }]
+  },
+  {
+    "id": "orbit_sharpen",
+    "name": "Lames aiguisées",
+    "description": "+25 % de dégâts et +10 % de vitesse des lames orbitales.",
+    "icon": "⚚",
+    "weight": 5,
+    "maxStacks": 4,
+    "requires": { "weapon": "orbit_blades" },
+    "effects": [
+      { "type": "weaponStat", "weapon": "orbit_blades", "stat": "damage", "op": "mul", "value": 0.25 },
+      { "type": "weaponStat", "weapon": "orbit_blades", "stat": "angularSpeed", "op": "mul", "value": 0.1 }
+    ]
+  },
+  {
+    "id": "nova_overcharge",
+    "name": "Nova surchargée",
+    "description": "-10 % de temps de recharge de la Nova, +15 % de dégâts.",
+    "icon": "✷",
+    "weight": 4,
+    "maxStacks": 3,
+    "hardMaxStacks": 6,
+    "requires": { "weapon": "nova" },
+    "effects": [
+      { "type": "weaponStat", "weapon": "nova", "stat": "cooldown", "op": "mul", "value": -0.1 },
+      { "type": "weaponStat", "weapon": "nova", "stat": "damage", "op": "mul", "value": 0.15 }
+    ]
   }
 ]

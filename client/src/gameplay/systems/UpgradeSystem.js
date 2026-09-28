@@ -7,6 +7,10 @@ import { GameSystem } from './GameSystem.js';
  * (UPGRADE_CHOSEN, émis par l'UI ou par une IA) via le registre d'effets.
  *
  * Plusieurs montées de niveau simultanées sont mises en file : une offre à la fois.
+ *
+ * `uncapped` (mode infini) : `maxStacks` est ignoré, seules les limites absolues
+ * `hardMaxStacks` (garde-fous : recharge, vitesse, nombre de projectiles…) s'appliquent.
+ * Une amélioration « unique » (`maxStacks: 1`, ex : débloquer une arme) le reste.
  */
 export class UpgradeSystem extends GameSystem {
   /**
@@ -15,15 +19,17 @@ export class UpgradeSystem extends GameSystem {
    *   rng: import('../../core/Random.js').Random, choiceCount: number,
    *   effects: Record<string, Function>,
    *   arsenal: import('../weapons/Arsenal.js').Arsenal,
+   *   uncapped?: boolean,
    * }} deps
    */
-  constructor({ bus, player, upgrades, rng, choiceCount, effects, arsenal }) {
+  constructor({ bus, player, upgrades, rng, choiceCount, effects, arsenal, uncapped = false }) {
     super('upgrades', bus);
     this._player = player;
     this._upgrades = upgrades;
     this._rng = rng;
     this._choiceCount = choiceCount;
     this._effects = effects;
+    this.uncapped = uncapped;
     this._effectCtx = {
       player,
       grantWeapon: (id) => arsenal.grant(player, id),
@@ -47,10 +53,16 @@ export class UpgradeSystem extends GameSystem {
     this.subs.on(GameEvents.UPGRADE_CHOSEN, ({ upgradeId }) => this._choose(upgradeId));
   }
 
+  /** Nombre maximal de cumuls d'une amélioration dans cette run. */
+  stackLimit(upgrade) {
+    if (!this.uncapped || upgrade.maxStacks === 1) return upgrade.maxStacks;
+    return upgrade.hardMaxStacks ?? Infinity;
+  }
+
   /** Améliorations actuellement proposables. */
   eligible() {
     return this._upgrades.filter((u) => {
-      if ((this.stacks.get(u.id) ?? 0) >= u.maxStacks) return false;
+      if ((this.stacks.get(u.id) ?? 0) >= this.stackLimit(u)) return false;
       const req = u.requires ?? {};
       if (req.weapon && !this._player.hasWeapon(req.weapon)) return false;
       if (req.missingWeapon && this._player.hasWeapon(req.missingWeapon)) return false;

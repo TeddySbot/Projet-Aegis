@@ -24,7 +24,8 @@ export class PlayingState extends GameState {
     this._pending = null;
   }
 
-  enter() {
+  /** @param {{ mode?: string }} [params] mode de jeu choisi au menu (campagne par défaut) */
+  enter(params) {
     this._pending = null;
     this._subs = new SubscriptionGroup(this._bus)
       .on(GameEvents.UPGRADE_CHOICES_OFFERED, (offer) => this._queue({ kind: 'push', to: 'LevelUp', params: offer }))
@@ -33,7 +34,7 @@ export class PlayingState extends GameState {
       if (this.machine.current === this) this._queue({ kind: 'push', to: 'Paused' });
     });
     this._hud.show();
-    this._session.start();
+    this._session.start(params?.mode ?? 'story');
   }
 
   exit() {

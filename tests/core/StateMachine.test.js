@@ -75,3 +75,13 @@ test('pop() sans état sous-jacent est une erreur', () => {
   m.start('Menu');
   assert.throws(() => m.pop(), /aucun état sous-jacent/);
 });
+
+test('le Sanctuaire est une page à part : Menu ⇄ Sanctuary, sans accès direct au jeu', () => {
+  const { m, log } = makeMachine();
+  m.start('Menu');
+  m.change('Sanctuary');
+  m.change('Menu');
+  assert.deepEqual(log, ['Menu.enter', 'Menu.exit', 'Sanctuary.enter', 'Sanctuary.exit', 'Menu.enter']);
+  m.change('Sanctuary');
+  assert.throws(() => m.change('Playing'), /Transition interdite : Sanctuary → Playing/);
+});

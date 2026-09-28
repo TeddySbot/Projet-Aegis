@@ -17,6 +17,7 @@ export const CONTENT_FILES = {
   waves: 'waves.json',
   upgrades: 'upgrades.json',
   metaUpgrades: 'meta-upgrades.json',
+  endless: 'endless.json',
 };
 
 export class ContentValidationError extends Error {

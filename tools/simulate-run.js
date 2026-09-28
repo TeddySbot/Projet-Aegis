@@ -5,7 +5,7 @@
  * l'AutopilotInput et un choix automatique d'améliorations. Vérifie qu'une run va au
  * bout sans exception et affiche un résumé (utile pour équilibrer les données).
  *
- * Options : --runs=N  --seed=S  --disable=score,xp  --verbose
+ * Options : --runs=N  --seed=S  --disable=score,xp  --mode=story|endless  --max=SECONDES  --verbose
  */
 import path from 'node:path';
 import { ContentRepository } from '../server/content/ContentRepository.js';
@@ -25,15 +25,15 @@ const args = Object.fromEntries(
 
 /**
  * Simule une run complète et renvoie son résumé.
- * @param {{ content: any, seed: number, disabled?: string[], maxSeconds?: number, verbose?: boolean, modifiers?: any }} options
+ * @param {{ content: any, seed: number, mode?: string, disabled?: string[], maxSeconds?: number, verbose?: boolean, modifiers?: any }} options
  */
-export function simulateRun({ content, seed, disabled = [], maxSeconds = 600, verbose = false, modifiers }) {
+export function simulateRun({ content, seed, mode = 'story', disabled = [], maxSeconds = 600, verbose = false, modifiers }) {
   const errors = [];
   const bus = new EventBus({ onError: (err, event) => errors.push(`${event}: ${err.stack ?? err}`) });
   let run = null;
   const input = new AutopilotInput({ getWorld: () => run?.world ?? null });
   const rng = new Random(seed);
-  run = new Run({ content, bus, input, rng, seed, disabled, modifiers });
+  run = new Run({ content, bus, input, rng, seed, mode, disabled, modifiers });
 
   const counts = {};
   const count = (e) => bus.on(e, () => (counts[e] = (counts[e] ?? 0) + 1));
@@ -48,7 +48,10 @@ export function simulateRun({ content, seed, disabled = [], maxSeconds = 600, ve
   });
   if (verbose) {
     bus.on(GameEvents.WAVE_STARTED, ({ index, wave }) => console.log(`  [${run.world.time.toFixed(1)}s] vague ${index + 1} : ${wave.name}`));
-    bus.on(GameEvents.BOSS_SPAWNED, () => console.log(`  [${run.world.time.toFixed(1)}s] BOSS !`));
+    bus.on(GameEvents.BOSS_SPAWNED, ({ enemy }) => console.log(`  [${run.world.time.toFixed(1)}s] BOSS ! ${enemy.name} (${enemy.maxHp} PV)`));
+    bus.on(GameEvents.BOSS_TIMER_STOPPED, ({ expired, remaining }) =>
+      console.log(`  [${run.world.time.toFixed(1)}s] ${expired ? 'temps écoulé !' : `boss vaincu (reste ${remaining.toFixed(1)} s)`}`),
+    );
   }
 
   let summary = null;
@@ -76,15 +79,17 @@ if (isMain) {
   const runs = Number(args.runs ?? 5);
   const baseSeed = Number(args.seed ?? 1);
   const disabled = typeof args.disable === 'string' ? args.disable.split(',') : [];
+  const mode = typeof args.mode === 'string' ? args.mode : 'story';
+  const maxSeconds = Number(args.max ?? (mode === 'endless' ? 3600 : 600));
   let failures = 0;
-  console.log(`Simulation de ${runs} run(s)${disabled.length ? ` — systèmes désactivés : ${disabled.join(', ')}` : ''}\n`);
+  console.log(`Simulation de ${runs} run(s) — mode ${mode}${disabled.length ? ` — systèmes désactivés : ${disabled.join(', ')}` : ''}\n`);
   for (let i = 0; i < runs; i++) {
     const seed = baseSeed + i;
-    const { summary, errors, picks } = await simulateRun({ content, seed, disabled, verbose: Boolean(args.verbose) });
+    const { summary, errors, picks } = await simulateRun({ content, seed, mode, disabled, maxSeconds, verbose: Boolean(args.verbose) });
     const s = summary;
     console.log(
-      `seed ${String(seed).padEnd(4)} ${s.outcome.padEnd(8)} ${s.duration.toFixed(0).padStart(4)}s  vague ${s.wave}  niv. ${String(s.level).padStart(2)}  ` +
-        `kills ${String(s.kills).padStart(4)}  score ${String(s.score).padStart(6)}  améliorations : ${picks.length}`,
+      `seed ${String(seed).padEnd(4)} ${s.outcome.padEnd(8)} ${s.cause.padEnd(11)} ${s.duration.toFixed(0).padStart(4)}s  vague ${String(s.wave).padStart(3)}  ` +
+        `boss ${s.bossKills}  niv. ${String(s.level).padStart(2)}  kills ${String(s.kills).padStart(5)}  score ${String(s.score).padStart(7)}  améliorations : ${picks.length}`,
     );
     if (errors.length) {
       failures++;

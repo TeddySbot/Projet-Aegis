@@ -1,0 +1,54 @@
+{
+  "name": "Mode infini",
+  "description": "Des vagues sans fin, un boss géant toutes les 10 vagues : tuez-le en moins d'une minute ou la run s'arrête.",
+  "waveDuration": 30,
+  "bossEvery": 10,
+  "bossTimeLimit": 60,
+  "bossSpawnDelay": 2,
+  "bosses": ["warden", "abyss_titan"],
+  "waveNames": [
+    "Les ombres s'allongent",
+    "La meute affamée",
+    "Nuée de feux follets",
+    "La charge",
+    "Les colosses s'éveillent",
+    "Marée noire",
+    "Le cercle se resserre",
+    "Tempête d'ombres",
+    "Le calme avant l'orage"
+  ],
+  "enemyScaling": {
+    "hpPerWave": 0.08,
+    "hpGrowth": 1.03,
+    "damagePerWave": 0.035,
+    "speedPerWave": 0.005,
+    "maxSpeed": 1.5,
+    "xpPerWave": 0.05,
+    "scorePerWave": 0.1
+  },
+  "bossScaling": {
+    "hpStart": 0.75,
+    "hpGrowth": 3,
+    "damageGrowth": 1.2,
+    "speedGrowth": 1.04,
+    "maxSpeed": 1.6,
+    "sizeStart": 1.6,
+    "sizePerTier": 0.3,
+    "maxSize": 4,
+    "xpGrowth": 1.5,
+    "scoreGrowth": 1.6
+  },
+  "intervalDecay": 0.97,
+  "minInterval": 0.3,
+  "bossWaveSpawnRate": 0.35,
+  "spawnPools": [
+    { "enemy": "shade", "fromWave": 1, "interval": 1.3, "intervalEnd": 0.8, "batch": 2, "batchPerWave": 0.12, "maxBatch": 6 },
+    { "enemy": "wisp", "fromWave": 2, "interval": 3.0, "intervalEnd": 1.8, "batch": 2, "batchPerWave": 0.1, "maxBatch": 6 },
+    { "enemy": "charger", "fromWave": 4, "interval": 4.5, "intervalEnd": 3.0, "batch": 1, "batchPerWave": 0.06, "maxBatch": 4 },
+    { "enemy": "brute", "fromWave": 6, "interval": 9, "intervalEnd": 6, "batch": 1, "batchPerWave": 0.05, "maxBatch": 3 }
+  ],
+  "runOverrides": {
+    "xpCurve": { "base": 4, "growth": 1.1, "flat": 3 }
+  },
+  "upgrades": { "uncapped": true }
+}

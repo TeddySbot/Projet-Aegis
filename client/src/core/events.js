@@ -7,18 +7,27 @@
  */
 export const GameEvents = Object.freeze({
   // --- Cycle de vie d'une run ---------------------------------------------
-  /** { seed, modifiers, disabled: string[], player: { hp, maxHp, weapons: {id, name}[] } } */
+  /** { mode: 'story'|'endless', seed, modifiers, disabled: string[], player: { hp, maxHp, weapons: {id, name}[] } } */
   RUN_STARTED: 'run:started',
-  /** Résumé de run : { outcome: 'victory'|'defeat'|'abandon', duration, score, kills, level, wave } */
+  /**
+   * Résumé de run : { mode, outcome: 'victory'|'defeat'|'abandon', cause: 'victory'|'death'|'bossTimeout'|'abandon',
+   *   duration, score, kills, level, wave, bossKills }
+   */
   RUN_ENDED: 'run:ended',
   /** { elapsed: number } — émis chaque seconde de jeu */
   RUN_TICK: 'run:tick',
 
   // --- Vagues ------------------------------------------------------------
-  /** { index: number, total: number, wave: WaveDef } */
+  /** { index: number, total: number|null (null = infini), wave: WaveDef } */
   WAVE_STARTED: 'wave:started',
-  /** { enemy } */
+  /** { enemy, tier: number|null } — `enemy.name` porte le nom affiché (ex : « Gardien déchu · Palier 2 ») */
   BOSS_SPAWNED: 'wave:boss-spawned',
+  /** { duration } — le boss doit être vaincu avant la fin du compte à rebours (`bossTimeLimit`) */
+  BOSS_TIMER_STARTED: 'wave:boss-timer-started',
+  /** { remaining: number (secondes entières), duration } */
+  BOSS_TIMER_TICK: 'wave:boss-timer-tick',
+  /** { expired: boolean, remaining } — expired = temps écoulé (défaite), sinon boss vaincu à temps */
+  BOSS_TIMER_STOPPED: 'wave:boss-timer-stopped',
   /** { index: number } */
   WAVE_COMPLETED: 'wave:completed',
   /** {} — toutes les vagues ont été survécues */
@@ -29,7 +38,7 @@ export const GameEvents = Object.freeze({
   ENEMY_SPAWNED: 'enemy:spawned',
   /** { enemy, amount, x, y, critical: boolean } */
   ENEMY_DAMAGED: 'enemy:damaged',
-  /** { enemy, typeId, x, y, xp, score } */
+  /** { enemy, typeId, x, y, xp, score, boss: boolean } */
   ENEMY_KILLED: 'enemy:killed',
   /** { weaponId, kind, x, y, radius?, color } */
   WEAPON_FIRED: 'weapon:fired',
@@ -67,7 +76,7 @@ export const GameEvents = Object.freeze({
   // --- Méta-progression ---------------------------------------------------
   /** { profile } */
   PROFILE_UPDATED: 'meta:profile-updated',
-  /** { run, profile, reward } */
+  /** { run, profile, reward, newEndlessRecord: boolean } */
   META_RUN_RECORDED: 'meta:run-recorded',
   /** { message } */
   META_SAVE_FAILED: 'meta:save-failed',

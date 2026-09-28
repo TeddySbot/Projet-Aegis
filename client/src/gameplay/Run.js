@@ -8,6 +8,10 @@
  *
  * La run ne dépend ni du DOM, ni du réseau, ni de la méta-progression : elle
  * tourne telle quelle dans Node (tests, simulation headless).
+ *
+ * Le MODE de jeu (`story` | `endless`, voir modes/gameModes.js) ne fait que configurer
+ * la run (fournisseur de vagues, config, plafonds d'améliorations) : les systèmes
+ * sont les mêmes dans les deux modes.
  */
 import { GameEvents } from '../core/events.js';
 import { World } from './World.js';
@@ -27,6 +31,7 @@ import { XpSystem } from './systems/XpSystem.js';
 import { UpgradeSystem } from './systems/UpgradeSystem.js';
 import { ScoreSystem } from './systems/ScoreSystem.js';
 import { RunDirector } from './systems/RunDirector.js';
+import { DEFAULT_MODE, gameModes } from './modes/gameModes.js';
 
 /**
  * Systèmes dans leur ordre de mise à jour. `required` : indispensable à la
@@ -38,7 +43,7 @@ export const SYSTEM_DEFINITIONS = [
   {
     id: 'waves',
     create: (d) =>
-      new WaveSystem({ bus: d.bus, world: d.world, waves: d.content.waves.waves, enemyFactory: d.enemyFactory, rng: d.rng, runConfig: d.runConfig }),
+      new WaveSystem({ bus: d.bus, world: d.world, waves: d.mode.waves, enemyFactory: d.enemyFactory, rng: d.rng, runConfig: d.runConfig }),
   },
   { id: 'enemies', create: (d) => new EnemySystem({ bus: d.bus, world: d.world, behaviors: enemyBehaviors, rng: d.rng, runConfig: d.runConfig }) },
   { id: 'weapons', create: (d) => new WeaponSystem({ bus: d.bus, world: d.world, damage: d.damage, rng: d.rng, weaponKinds }) },
@@ -55,6 +60,7 @@ export const SYSTEM_DEFINITIONS = [
         choiceCount: d.runConfig.upgradeChoices,
         effects: upgradeEffects,
         arsenal: d.arsenal,
+        uncapped: d.mode.upgradesUncapped,
       }),
   },
   {
@@ -74,11 +80,16 @@ export class Run {
    *   input: { getMoveVector(): {x: number, y: number} },
    *   rng: import('../core/Random.js').Random,
    *   seed?: number,
-   *   modifiers?: { statModifiers: any[], startingWeapons: string[] },
+   *   mode?: string,
+   *   modifiers?: { statModifiers: any[], startingWeapons: string[], weaponModifiers?: any[] },
    *   disabled?: Iterable<string>,
    * }} options
    */
-  constructor({ content, bus, input, rng, seed = 0, modifiers = { statModifiers: [], startingWeapons: [] }, disabled = [] }) {
+  constructor({ content, bus, input, rng, seed = 0, mode = DEFAULT_MODE, modifiers = { statModifiers: [], startingWeapons: [], weaponModifiers: [] }, disabled = [] }) {
+    const modeStrategy = gameModes[mode];
+    if (!modeStrategy) throw new Error(`Mode de jeu inconnu : ${mode}`);
+    const modeSetup = modeStrategy.configure(content);
+    this.mode = mode;
     this.bus = bus;
     this.world = new World();
     this.world.player = new Player({ def: content.player, modifiers });
@@ -90,10 +101,11 @@ export class Run {
       input,
       rng,
       world: this.world,
-      runConfig: content.config.run,
+      mode: modeSetup,
+      runConfig: modeSetup.runConfig,
       enemyFactory: new EnemyFactory({ enemies: content.enemies, world: this.world }),
       damage: new DamageResolver({ bus, player: this.world.player, rng }),
-      arsenal: new Arsenal({ bus, weapons: content.weapons }),
+      arsenal: new Arsenal({ bus, weapons: content.weapons, weaponModifiers: modifiers.weaponModifiers ?? [] }),
     };
 
     /** @type {Map<string, import('./systems/GameSystem.js').GameSystem>} */
@@ -115,6 +127,7 @@ export class Run {
   start() {
     const p = this.world.player;
     this.bus.emit(GameEvents.RUN_STARTED, {
+      mode: this.mode,
       seed: this._seed,
       modifiers: this._modifiers,
       disabled: this.disabled,

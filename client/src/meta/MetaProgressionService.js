@@ -51,11 +51,14 @@ export class MetaProgressionService {
   }
 
   async recordRun(summary) {
+    // Lu AVANT l'enregistrement : permet d'annoncer un nouveau record du mode infini.
+    const previousBest = this.profile.stats?.bestEndlessWave ?? 0;
     try {
       const { profile, reward } = await this._repo.recordRun(summary);
       this.profile = profile;
-      this.lastResult = { run: summary, reward };
-      this._bus.emit(GameEvents.META_RUN_RECORDED, { run: summary, reward, profile });
+      const newEndlessRecord = summary.mode === 'endless' && summary.wave > previousBest;
+      this.lastResult = { run: summary, reward, newEndlessRecord };
+      this._bus.emit(GameEvents.META_RUN_RECORDED, { run: summary, reward, profile, newEndlessRecord });
       this._bus.emit(GameEvents.PROFILE_UPDATED, { profile });
     } catch (err) {
       this._bus.emit(GameEvents.META_SAVE_FAILED, { message: String(err?.message ?? err) });

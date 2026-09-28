@@ -24,9 +24,16 @@ npm start            # http://127.0.0.1:3000 (aucune dépendance à installer po
 | Pause | Échap ou P |
 | Choisir une amélioration | clic ou 1 · 2 · 3 |
 | Couper le son | M |
+| Écran titre : campagne / mode infini / Sanctuaire | Entrée / I / S |
 
 Une run dure ≈ 2 min 30 : trois vagues, un boss, des montées de niveau avec choix d'améliorations, un score
-final converti en **éclats** que l'on dépense entre les runs dans le *Sanctuaire* (améliorations permanentes).
+final converti en **éclats** que l'on dépense entre les runs dans le *Sanctuaire* (améliorations permanentes,
+page dédiée accessible depuis l'écran titre).
+
+**∞ Mode infini** (carte de droite sur l'écran titre) : des vagues de 30 s sans fin, de plus en plus denses et
+résistantes ; **toutes les 10 vagues, un boss géant** qu'il faut tuer **en moins d'une minute**, sinon la run
+s'arrête. Chaque palier de boss est plus gros et plus puissant. Les améliorations n'ont plus de plafond.
+Bonus d'éclats par boss vaincu et record de vague affiché au menu.
 
 ## Scripts
 
@@ -34,8 +41,8 @@ final converti en **éclats** que l'on dépense entre les runs dans le *Sanctuai
 |---|---|
 | `npm start` | démarre le serveur (options : `PORT`, `HOST`, `AEGIS_DATA_DIR`, `AEGIS_SAVE_DIR`, `--open`) |
 | `npm run dev` | idem avec redémarrage automatique |
-| `npm test` | 57 tests `node:test` |
-| `npm run simulate -- --runs=10 --verbose` | joue des runs complètes sans navigateur (IA) |
+| `npm test` | 82 tests `node:test` |
+| `npm run simulate -- --runs=10 --verbose` | joue des runs complètes sans navigateur (IA) ; `--mode=endless` pour le mode infini |
 | `npm run validate-data` | valide les fichiers de `data/` |
 | `npm run build:win` | produit `dist/Aegis-win/Aegis.exe` (nécessite `npm install`) |
 
@@ -44,7 +51,7 @@ final converti en **éclats** que l'on dépense entre les runs dans le *Sanctuai
 | Paramètre | Effet |
 |---|---|
 | `?disable=score,xp,sfx` | désactive des systèmes : le jeu continue de fonctionner |
-| `?autopilot=1&autostart=1` | une IA joue à votre place |
+| `?autopilot=1&autostart=1` | une IA joue à votre place (`&mode=endless` : en mode infini) |
 | `?debug=1` | overlay : FPS, pile d'états, systèmes actifs, événements/s |
 | `?seed=42` | run reproductible |
 | `?speed=3` | accélère la simulation |

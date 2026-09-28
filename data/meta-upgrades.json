@@ -2,43 +2,256 @@
   {
     "id": "meta_vitality",
     "name": "Constitution",
-    "description": "+10 PV max au début de chaque run.",
-    "costs": [5, 10, 20, 35, 55],
-    "effect": { "type": "stat", "stat": "maxHp", "op": "add", "valuePerLevel": 10 }
+    "icon": "❤",
+    "description": "+5 PV max par niveau.",
+    "costs": [5, 6, 7, 9, 10, 12, 15, 18, 21, 26, 31, 37, 45, 53, 64, 77, 92, 110, 135, 160],
+    "effects": [
+      { "type": "stat", "stat": "maxHp", "op": "add", "valuePerLevel": 5 }
+    ]
   },
   {
     "id": "meta_might",
     "name": "Entraînement",
-    "description": "+5 % de dégâts.",
-    "costs": [8, 16, 30, 50],
-    "effect": { "type": "stat", "stat": "might", "op": "mul", "valuePerLevel": 0.05 }
+    "icon": "⚔",
+    "description": "+2,5 % de dégâts par niveau.",
+    "costs": [8, 10, 12, 14, 17, 20, 24, 29, 34, 41, 50, 59, 71, 86, 105, 125, 150, 175, 215, 255],
+    "effects": [
+      { "type": "stat", "stat": "might", "op": "mul", "valuePerLevel": 0.025 }
+    ]
   },
   {
     "id": "meta_swiftness",
     "name": "Agilité",
-    "description": "+4 % de vitesse de déplacement.",
-    "costs": [6, 14, 28],
-    "effect": { "type": "stat", "stat": "moveSpeed", "op": "mul", "valuePerLevel": 0.04 }
+    "icon": "👟",
+    "description": "+2 % de vitesse de déplacement par niveau.",
+    "costs": [6, 8, 10, 13, 17, 22, 29, 38, 49, 64],
+    "effects": [
+      { "type": "stat", "stat": "moveSpeed", "op": "mul", "valuePerLevel": 0.02 }
+    ]
   },
   {
     "id": "meta_greed",
     "name": "Avidité",
-    "description": "+10 % d'expérience gagnée.",
-    "costs": [10, 25, 45],
-    "effect": { "type": "stat", "stat": "xpGain", "op": "mul", "valuePerLevel": 0.1 }
+    "icon": "📖",
+    "description": "+4 % d'expérience gagnée par niveau.",
+    "costs": [8, 10, 12, 15, 19, 23, 29, 36, 45, 55, 69, 85, 105, 130, 165],
+    "effects": [
+      { "type": "stat", "stat": "xpGain", "op": "mul", "valuePerLevel": 0.04 }
+    ]
   },
   {
     "id": "meta_armor",
     "name": "Carapace",
-    "description": "-1 dégât subi par coup.",
-    "costs": [12, 30],
-    "effect": { "type": "stat", "stat": "armor", "op": "add", "valuePerLevel": 1 }
+    "icon": "🛡",
+    "description": "+0,3 d'armure par niveau (dégâts subis réduits, arrondis).",
+    "costs": [12, 16, 20, 26, 34, 45, 58, 75, 98, 125],
+    "effects": [
+      { "type": "stat", "stat": "armor", "op": "add", "valuePerLevel": 0.3 }
+    ]
   },
   {
     "id": "meta_orbit_start",
     "name": "Héritage des lames",
-    "description": "Commence chaque run avec les Lames orbitales.",
-    "costs": [40],
-    "effect": { "type": "startingWeapon", "weapon": "orbit_blades" }
+    "icon": "✦",
+    "description": "Commence chaque run avec les Lames orbitales. +3 % de vitesse de rotation par niveau.",
+    "costs": [40, 52, 68, 88, 115, 150, 195, 250, 325, 425],
+    "effects": [
+      { "type": "startingWeapon", "weapon": "orbit_blades" },
+      { "type": "weaponStat", "weapon": "orbit_blades", "stat": "angularSpeed", "op": "mul", "valuePerLevel": 0.03 }
+    ]
+  },
+  {
+    "id": "meta_titan",
+    "name": "Colosse",
+    "icon": "🗿",
+    "description": "+2 % de PV max par niveau (s'ajoute à Constitution).",
+    "costs": [20, 26, 34, 44, 57, 74, 97, 125, 165, 210],
+    "effects": [
+      { "type": "stat", "stat": "maxHp", "op": "mul", "valuePerLevel": 0.02 }
+    ]
+  },
+  {
+    "id": "meta_regen",
+    "name": "Sève d'Égide",
+    "icon": "🌿",
+    "description": "+0,1 PV régénéré par seconde par niveau.",
+    "costs": [10, 12, 15, 19, 24, 29, 36, 45, 56, 69, 86, 105, 130, 165, 205],
+    "effects": [
+      { "type": "stat", "stat": "regen", "op": "add", "valuePerLevel": 0.1 }
+    ]
+  },
+  {
+    "id": "meta_haste",
+    "name": "Célérité",
+    "icon": "⏳",
+    "description": "-1 % de temps de recharge des armes par niveau.",
+    "costs": [10, 12, 15, 19, 24, 29, 36, 45, 56, 69, 86, 105, 130, 165, 205],
+    "effects": [
+      { "type": "stat", "stat": "cooldownReduction", "op": "add", "valuePerLevel": 0.01 }
+    ]
+  },
+  {
+    "id": "meta_reach",
+    "name": "Rayonnement",
+    "icon": "🌀",
+    "description": "+2 % de zone d'effet par niveau.",
+    "costs": [8, 10, 12, 15, 19, 23, 29, 36, 45, 55, 69, 85, 105, 130, 165],
+    "effects": [
+      { "type": "stat", "stat": "area", "op": "mul", "valuePerLevel": 0.02 }
+    ]
+  },
+  {
+    "id": "meta_velocity",
+    "name": "Balistique",
+    "icon": "➶",
+    "description": "+3 % de vitesse des projectiles par niveau.",
+    "costs": [5, 6, 8, 11, 14, 19, 24, 31, 41, 53],
+    "effects": [
+      { "type": "stat", "stat": "projectileSpeed", "op": "mul", "valuePerLevel": 0.03 }
+    ]
+  },
+  {
+    "id": "meta_magnet",
+    "name": "Magnétisme",
+    "icon": "🧲",
+    "description": "+6 % de rayon de ramassage par niveau.",
+    "costs": [4, 5, 7, 9, 11, 15, 19, 25, 33, 42],
+    "effects": [
+      { "type": "stat", "stat": "pickupRadius", "op": "mul", "valuePerLevel": 0.06 }
+    ]
+  },
+  {
+    "id": "meta_precision",
+    "name": "Précision",
+    "icon": "🎯",
+    "description": "+1 % de chances de coup critique par niveau.",
+    "costs": [8, 10, 12, 15, 19, 23, 29, 36, 45, 55, 69, 85, 105, 130, 165],
+    "effects": [
+      { "type": "stat", "stat": "critChance", "op": "add", "valuePerLevel": 0.01 }
+    ]
+  },
+  {
+    "id": "meta_ruin",
+    "name": "Coup fatal",
+    "icon": "💥",
+    "description": "+5 % de dégâts critiques par niveau.",
+    "costs": [10, 12, 15, 19, 24, 29, 36, 45, 56, 69, 86, 105, 130, 165, 205],
+    "effects": [
+      { "type": "stat", "stat": "critMultiplier", "op": "add", "valuePerLevel": 0.05 }
+    ]
+  },
+  {
+    "id": "meta_multishot",
+    "name": "Salve ancestrale",
+    "icon": "➹",
+    "description": "+2 % de dégâts par niveau ; +1 projectile par tir aux niveaux 5 et 10.",
+    "costs": [30, 39, 51, 66, 86, 110, 145, 190, 245, 320],
+    "effects": [
+      { "type": "stat", "stat": "might", "op": "mul", "valuePerLevel": 0.02 },
+      { "type": "stat", "stat": "extraProjectiles", "op": "add", "valuePerLevel": 1, "everyLevels": 5 }
+    ]
+  },
+  {
+    "id": "meta_nova_start",
+    "name": "Héritage de l'onde",
+    "icon": "◎",
+    "description": "Commence chaque run avec la Nova d'Égide. -2 % de temps de recharge de la Nova par niveau.",
+    "costs": [55, 72, 93, 120, 155, 205, 265, 345, 450, 585],
+    "effects": [
+      { "type": "startingWeapon", "weapon": "nova" },
+      { "type": "weaponStat", "weapon": "nova", "stat": "cooldown", "op": "mul", "valuePerLevel": -0.02 }
+    ]
+  },
+  {
+    "id": "meta_bolt_power",
+    "name": "Trait affûté",
+    "icon": "✧",
+    "description": "Trait arcanique : +3 % de dégâts par niveau.",
+    "costs": [6, 7, 9, 10, 12, 15, 18, 21, 26, 31, 37, 45, 53, 64, 77, 92, 110, 135, 160, 190],
+    "effects": [
+      { "type": "weaponStat", "weapon": "arcane_bolt", "stat": "damage", "op": "mul", "valuePerLevel": 0.03 }
+    ]
+  },
+  {
+    "id": "meta_bolt_tempo",
+    "name": "Incantation rapide",
+    "icon": "⚡",
+    "description": "Trait arcanique : -2 % de temps de recharge par niveau.",
+    "costs": [10, 12, 15, 19, 24, 29, 36, 45, 56, 69, 86, 105, 130, 165, 205],
+    "effects": [
+      { "type": "weaponStat", "weapon": "arcane_bolt", "stat": "cooldown", "op": "mul", "valuePerLevel": -0.02 }
+    ]
+  },
+  {
+    "id": "meta_bolt_pierce",
+    "name": "Pointe de diamant",
+    "icon": "💎",
+    "description": "Trait arcanique : +3 % de vitesse par niveau ; traverse 1 ennemi de plus aux niveaux 5 et 10.",
+    "costs": [20, 26, 34, 44, 57, 74, 97, 125, 165, 210],
+    "effects": [
+      { "type": "weaponStat", "weapon": "arcane_bolt", "stat": "speed", "op": "mul", "valuePerLevel": 0.03 },
+      { "type": "weaponStat", "weapon": "arcane_bolt", "stat": "pierce", "op": "add", "valuePerLevel": 1, "everyLevels": 5 }
+    ]
+  },
+  {
+    "id": "meta_blades_edge",
+    "name": "Fil tranchant",
+    "icon": "🗡",
+    "description": "Lames orbitales : +4 % de dégâts par niveau (dès qu'elles sont obtenues).",
+    "costs": [8, 10, 12, 14, 17, 20, 24, 29, 34, 41, 50, 59, 71, 86, 105, 125, 150, 175, 215, 255],
+    "effects": [
+      { "type": "weaponStat", "weapon": "orbit_blades", "stat": "damage", "op": "mul", "valuePerLevel": 0.04 }
+    ]
+  },
+  {
+    "id": "meta_blades_orbit",
+    "name": "Grande orbite",
+    "icon": "🪐",
+    "description": "Lames orbitales : +3 % de rayon d'orbite par niveau.",
+    "costs": [6, 8, 10, 13, 17, 22, 29, 38, 49, 64],
+    "effects": [
+      { "type": "weaponStat", "weapon": "orbit_blades", "stat": "orbitRadius", "op": "mul", "valuePerLevel": 0.03 }
+    ]
+  },
+  {
+    "id": "meta_blades_count",
+    "name": "Lame jumelle",
+    "icon": "⚔",
+    "description": "Lames orbitales : -2 % de délai entre deux touches par niveau ; +1 lame aux niveaux 5 et 10.",
+    "costs": [25, 32, 42, 55, 71, 93, 120, 155, 205, 265],
+    "effects": [
+      { "type": "weaponStat", "weapon": "orbit_blades", "stat": "hitCooldown", "op": "mul", "valuePerLevel": -0.02 },
+      { "type": "weaponStat", "weapon": "orbit_blades", "stat": "count", "op": "add", "valuePerLevel": 1, "everyLevels": 5 }
+    ]
+  },
+  {
+    "id": "meta_nova_power",
+    "name": "Onde brisante",
+    "icon": "🔮",
+    "description": "Nova d'Égide : +4 % de dégâts par niveau (dès qu'elle est obtenue).",
+    "costs": [10, 12, 14, 17, 21, 25, 30, 36, 43, 52, 62, 74, 89, 105, 130, 155, 185, 220, 265, 320],
+    "effects": [
+      { "type": "weaponStat", "weapon": "nova", "stat": "damage", "op": "mul", "valuePerLevel": 0.04 }
+    ]
+  },
+  {
+    "id": "meta_nova_radius",
+    "name": "Écho profond",
+    "icon": "◉",
+    "description": "Nova d'Égide : +2,5 % de rayon par niveau.",
+    "costs": [8, 10, 12, 15, 19, 23, 29, 36, 45, 55, 69, 85, 105, 130, 165],
+    "effects": [
+      { "type": "weaponStat", "weapon": "nova", "stat": "radius", "op": "mul", "valuePerLevel": 0.025 }
+    ]
+  },
+  {
+    "id": "meta_nova_force",
+    "name": "Répulsion",
+    "icon": "🌊",
+    "description": "Nova d'Égide : +5 % de recul par niveau.",
+    "costs": [6, 8, 10, 13, 17, 22, 29, 38, 49, 64],
+    "effects": [
+      { "type": "weaponStat", "weapon": "nova", "stat": "knockback", "op": "mul", "valuePerLevel": 0.05 }
+    ]
   }
 ]

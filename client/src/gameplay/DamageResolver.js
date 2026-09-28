@@ -49,8 +49,8 @@ export class DamageResolver {
         typeId: enemy.typeId,
         x: enemy.x,
         y: enemy.y,
-        xp: enemy.def.xp,
-        score: enemy.def.score,
+        xp: enemy.xp,
+        score: enemy.score,
         boss: enemy.boss,
       });
       return true;

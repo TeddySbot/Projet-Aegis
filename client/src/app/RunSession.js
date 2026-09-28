@@ -13,7 +13,7 @@ export class RunSession {
   /**
    * @param {{
    *   bus: any, content: any, input: any,
-   *   getModifiers: () => { statModifiers: any[], startingWeapons: string[] },
+   *   getModifiers: () => { statModifiers: any[], startingWeapons: string[], weaponModifiers: any[] },
    *   disabledSystems?: string[], seed?: number | null,
    * }} deps
    */
@@ -32,7 +32,8 @@ export class RunSession {
     return this.run?.world ?? null;
   }
 
-  start() {
+  /** @param {string} [mode] mode de jeu (`story` | `endless`) */
+  start(mode = 'story') {
     this.dispose();
     const seed = this._fixedSeed ?? Math.floor(Math.random() * 2 ** 31);
     this.run = new Run({
@@ -41,6 +42,7 @@ export class RunSession {
       input: this._input,
       rng: new Random(seed),
       seed,
+      mode,
       modifiers: this._getModifiers(),
       disabled: this._disabled,
     });

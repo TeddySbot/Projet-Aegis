@@ -47,6 +47,15 @@ test('cycle méta : run → récompense → achat', async () => {
   assert.equal(r.body.profile.shards, expected - bundle.metaUpgrades[0].costs[0]);
 });
 
+test('mode infini : le serveur crédite le bonus de boss et enregistre le record de vague', async () => {
+  const before = (await json('GET', '/api/profile')).body.profile;
+  const r = await json('POST', '/api/profile/runs', { mode: 'endless', outcome: 'defeat', cause: 'bossTimeout', score: 0, kills: 900, level: 40, wave: 30, bossKills: 2, duration: 900 });
+  assert.equal(r.status, 201);
+  assert.equal(r.body.reward, 2 * bundle.config.rewards.endlessBossKillBonus);
+  assert.equal(r.body.profile.stats.bestEndlessWave, Math.max(30, before.stats.bestEndlessWave));
+  assert.equal(r.body.profile.stats.victories, before.stats.victories);
+});
+
 test('achat refusé : amélioration inconnue ou solde insuffisant', async () => {
   assert.equal((await json('POST', '/api/profile/purchases', { upgradeId: 'nope' })).status, 404);
   await json('DELETE', '/api/profile');

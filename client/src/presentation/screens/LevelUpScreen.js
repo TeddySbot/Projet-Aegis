@@ -7,10 +7,10 @@ export class LevelUpScreen extends Screen {
   }
 
   /**
-   * @param {{ level: number, choices: any[], stacks: (id: string) => number }} view
+   * @param {{ level: number, choices: any[], stacks: (id: string) => number, limit?: (u: any) => number }} view
    * @param {{ onChoose: (id: string) => void }} actions
    */
-  render({ level, choices, stacks }, { onChoose }) {
+  render({ level, choices, stacks, limit = (u) => u.maxStacks }, { onChoose }) {
     this.el.replaceChildren(
       h('div.levelup', {}, [
         h('h2', { text: `Niveau ${level} !` }),
@@ -24,11 +24,17 @@ export class LevelUpScreen extends Screen {
               h('span.icon', { text: u.icon ?? '✦' }),
               h('strong', { text: u.name }),
               h('span.desc', { text: u.description }),
-              h('span.stacks', { text: u.maxStacks > 1 ? `Niv. ${stacks(u.id) + 1} / ${u.maxStacks}` : 'Unique' }),
+              h('span.stacks', { text: stackLabel(stacks(u.id) + 1, limit(u)) }),
             ]),
           ),
         ),
       ]),
     );
   }
+}
+
+/** « Niv. 3 / 5 », « Niv. 12 · ∞ » (sans plafond, mode infini) ou « Unique ». */
+function stackLabel(next, max) {
+  if (max === 1) return 'Unique';
+  return Number.isFinite(max) ? `Niv. ${next} / ${max}` : `Niv. ${next} · ∞`;
 }

@@ -1,23 +1,44 @@
 import { GameState } from '../core/StateMachine.js';
 
-/** Menu principal + boutique de méta-progression. */
+/**
+ * Écran titre : choix du mode de jeu (campagne / infini), accès au Sanctuaire
+ * (améliorations permanentes, état séparé) et statistiques du profil.
+ */
 export class MenuState extends GameState {
-  /** @param {{ screen: import('../presentation/screens/MenuScreen.js').MenuScreen, meta: import('../meta/MetaProgressionService.js').MetaProgressionService, hud: any, input: any }} deps */
-  constructor({ screen, meta, hud, input }) {
+  /**
+   * @param {{ screen: import('../presentation/screens/MenuScreen.js').MenuScreen,
+   *   meta: import('../meta/MetaProgressionService.js').MetaProgressionService,
+   *   hud: any, input: any, modes: ReturnType<typeof import('../app/modeSummaries.js').describeModes> }} deps
+   */
+  constructor({ screen, meta, hud, input, modes }) {
     super('Menu');
     this._screen = screen;
     this._meta = meta;
     this._hud = hud;
     this._input = input;
+    this._modes = modes;
   }
 
   enter() {
     this._hud.hide();
-    this._render();
+    const shop = this._meta.getShop();
+    this._screen.render(
+      {
+        profile: this._meta.profile,
+        storageLabel: this._meta.storageLabel,
+        modes: this._modes,
+        affordable: shop.filter((item) => item.affordable).length,
+      },
+      {
+        onStart: (mode) => this._start(mode),
+        onOpenSanctuary: () => this.machine.change('Sanctuary'),
+      },
+    );
     this._screen.show();
-    this._offKeys = this._input.onKey?.(['Enter'], (e) => {
-      if (e.target?.tagName === 'BUTTON') return; // le bouton focalisé gère déjà Entrée
-      this._start();
+    this._offKeys = this._input.onKey?.(['Enter', 'KeyI', 'KeyS'], (e) => {
+      if (e.code === 'Enter' && e.target?.tagName === 'BUTTON') return; // le bouton focalisé gère déjà Entrée
+      if (e.code === 'KeyS') this.machine.change('Sanctuary');
+      else this._start(e.code === 'KeyI' ? 'endless' : 'story');
     });
   }
 
@@ -26,29 +47,8 @@ export class MenuState extends GameState {
     this._screen.hide();
   }
 
-  _start() {
-    this.machine.change('Playing');
-  }
-
-  _render(message) {
-    this._screen.render(
-      { profile: this._meta.profile, shop: this._meta.getShop(), storageLabel: this._meta.storageLabel, message },
-      {
-        onStart: () => this._start(),
-        onBuy: async (id) => {
-          try {
-            await this._meta.purchase(id);
-            this._render();
-          } catch (err) {
-            this._render(`Achat impossible : ${err.message}`);
-          }
-        },
-        onReset: async () => {
-          await this._meta.reset();
-          this._render('Progression réinitialisée.');
-        },
-      },
-    );
-    this._screen.show();
+  /** @param {'story'|'endless'} mode */
+  _start(mode) {
+    this.machine.change('Playing', { mode });
   }
 }

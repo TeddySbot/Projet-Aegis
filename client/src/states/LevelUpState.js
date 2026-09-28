@@ -16,7 +16,12 @@ export class LevelUpState extends GameState {
     this._choices = offer.choices;
     const upgrades = this._session.run?.system('upgrades');
     this._screen.render(
-      { level: offer.level, choices: offer.choices, stacks: (id) => upgrades?.stacks.get(id) ?? 0 },
+      {
+        level: offer.level,
+        choices: offer.choices,
+        stacks: (id) => upgrades?.stacks.get(id) ?? 0,
+        limit: (u) => upgrades?.stackLimit(u) ?? u.maxStacks,
+      },
       { onChoose: (id) => this._choose(id) },
     );
     this._screen.show();

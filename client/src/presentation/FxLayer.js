@@ -51,10 +51,10 @@ export class FxLayer {
       })
       .on(GameEvents.LEVEL_UP, () => (this._levelFlash = 0.6))
       .on(GameEvents.WAVE_STARTED, ({ index, total, wave }) =>
-        this._showBanner(`Vague ${index + 1} / ${total}`, wave.name ?? ''),
+        this._showBanner(total ? `Vague ${index + 1} / ${total}` : `Vague ${index + 1}`, wave.name ?? ''),
       )
       .on(GameEvents.BOSS_SPAWNED, ({ enemy }) => {
-        this._showBanner('⚠ Boss', enemy.def.name, '#f15bb5');
+        this._showBanner('⚠ Boss', enemy.name ?? enemy.def.name, '#f15bb5');
         this._shake(10);
       });
   }

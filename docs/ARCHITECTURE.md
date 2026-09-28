@@ -59,7 +59,7 @@ performances JavaScript qui imposent de garder le nombre d'entités raisonnable 
 flowchart TB
   subgraph Navigateur["Navigateur (client/src)"]
     MAIN["main.js<br/><i>composition root</i>"]
-    STATES["states/<br/>Menu · Playing · Paused · LevelUp · GameOver"]
+    STATES["states/<br/>Menu · Sanctuary · Playing · Paused · LevelUp · GameOver"]
     PRES["presentation/<br/>CanvasRenderer · Hud · FxLayer · SfxPlayer · écrans DOM"]
     APP["app/RunSession"]
     META["meta/<br/>MetaProgressionService · dépôts de profil"]
@@ -161,14 +161,14 @@ le `RunDirector` (statistiques de fin), le `Hud` (compteur), le `FxLayer` (parti
 | Système | Rôle | Écoute | Émet |
 |---|---|---|---|
 | `PlayerSystem` *(requis)* | déplacement via une **source d'entrée abstraite**, régénération | — | `PLAYER_HEALED` |
-| `WaveSystem` | vagues de `waves.json`, apparitions, boss | `RUN_STARTED`, `ENEMY_KILLED` | `WAVE_*`, `ENEMY_SPAWNED`, `BOSS_SPAWNED` |
+| `WaveSystem` | vagues d'un **fournisseur** (campagne ou infini), apparitions, boss, chrono de boss | `RUN_STARTED`, `ENEMY_KILLED` | `WAVE_*`, `ENEMY_SPAWNED`, `BOSS_SPAWNED`, `BOSS_TIMER_*` |
 | `EnemySystem` | comportements (stratégies), recul, séparation | — | `ENEMY_TELEGRAPH` (via stratégie) |
 | `WeaponSystem` | fait agir chaque arme selon son `kind` | — | `WEAPON_FIRED` |
 | `CombatSystem` *(requis)* | collisions projectiles/ennemis/joueur | — | `PLAYER_DAMAGED`, `PLAYER_DIED` |
 | `XpSystem` | orbes, aimant, courbe d'XP | `ENEMY_KILLED` | `XP_GAINED`, `LEVEL_UP` |
 | `UpgradeSystem` | tirage pondéré, application des effets | `LEVEL_UP`, `UPGRADE_CHOSEN` | `UPGRADE_CHOICES_OFFERED`, `UPGRADE_APPLIED` |
 | `ScoreSystem` | score | `ENEMY_KILLED`, `RUN_TICK`, `ALL_WAVES_COMPLETED` | `SCORE_CHANGED` |
-| `RunDirector` *(requis)* | horloge, conditions de fin, résumé | kills, score, niveau, vague, mort, victoire | `RUN_TICK`, `RUN_ENDED` |
+| `RunDirector` *(requis)* | horloge, conditions de fin, résumé | mode, kills, boss, score, niveau, vague, mort, chrono expiré, victoire | `RUN_TICK`, `RUN_ENDED` |
 
 Le catalogue complet des événements et de leurs payloads est dans `client/src/core/events.js` : c'est le
 **contrat** entre systèmes.
@@ -195,6 +195,8 @@ marqués `required` (sans eux, une run n'a plus de sens : pas de joueur, pas de 
 ```mermaid
 stateDiagram-v2
   [*] --> Menu
+  Menu --> Sanctuary : change
+  Sanctuary --> Menu : change
   Menu --> Playing : change
   Playing --> Paused : push
   Paused --> Playing : pop
@@ -275,15 +277,16 @@ Tout le contenu est dans `data/`, **aucune valeur d'équilibrage n'est codée en
 |---|---|
 | `config.json` | courbe d'XP, nombre de choix, rayons d'apparition, récompenses méta, effets activés |
 | `player.json` | statistiques de base, armes de départ |
-| `enemies.json` | 5 types : PV, vitesse, dégâts, XP, score, **comportement** + paramètres |
-| `waves.json` | 3 vagues : durée, règles d'apparition périodiques (intervalle interpolé) ou ponctuelles, boss |
+| `enemies.json` | 6 types (dont 2 boss) : PV, vitesse, dégâts, XP, score, **comportement** + paramètres |
+| `waves.json` | 3 vagues de la campagne : durée, règles d'apparition périodiques (intervalle interpolé) ou ponctuelles, boss, multiplicateurs `scale` optionnels |
+| `endless.json` | paramètres du **mode infini** : durée des vagues, boss tous les N vagues, chrono du boss, bassins d'apparition, courbes de renforcement des ennemis et des boss, surcharges de config |
 | `weapons.json` | 3 armes : **type** (`projectile`, `orbit`, `pulse`), **ciblage**, statistiques |
-| `upgrades.json` | 14 améliorations de run : poids, cumul max, prérequis, liste d'**effets** |
+| `upgrades.json` | 17 améliorations de run : poids, cumul max (`maxStacks`), limite absolue sans plafond (`hardMaxStacks`), prérequis, liste d'**effets** |
 | `meta-upgrades.json` | 6 améliorations permanentes : coûts par niveau, effet |
 
 Le lien entre données et code passe par des **stratégies indexées par nom** (registres) :
 `enemyBehaviors` (`chase`, `zigzag`, `charge`), `weaponKinds`, `targetingStrategies`, `upgradeEffects`
-(`stat`, `heal`, `grantWeapon`, `weaponStat`). Les améliorations de run et méta passent toutes par le même
+(`stat`, `heal`, `grantWeapon`, `weaponStat`), `gameModes` (`story`, `endless`). Les améliorations de run et méta passent toutes par le même
 mécanisme de `Stats` à modificateurs : `valeur = (base + Σ add) × (1 + Σ mul)`.
 
 **Validation (fail fast)** : au démarrage, le serveur valide la forme **et l'intégrité référentielle**
@@ -308,9 +311,9 @@ seuls leurs paramètres sont en données.
 
 ### 4.5 Méta-progression persistante, découplée de la run
 
-- **Entrée** : `MetaProgressionService` n'écoute qu'**un** événement, `RUN_ENDED` (résumé : issue, score,
-  éliminations, niveau, vague, durée).
-- **Sortie** : `getRunModifiers()` renvoie de **simples données** (`statModifiers`, `startingWeapons`)
+- **Entrée** : `MetaProgressionService` n'écoute qu'**un** événement, `RUN_ENDED` (résumé : mode, issue,
+  cause, score, éliminations, niveau, vague, boss vaincus, durée).
+- **Sortie** : `getRunModifiers()` renvoie de **simples données** (`statModifiers`, `startingWeapons`, `weaponModifiers`)
   que `RunSession` passe à `new Run(...)`. Le gameplay ignore l'existence de la méta.
 - **Règles pures et partagées** (`shared/meta/metaRules.js`) : calcul de la récompense (éclats), achat
   (coût, niveau max, solde), assainissement d'un profil corrompu ou d'un résumé malformé.
@@ -323,7 +326,36 @@ seuls leurs paramètres sont en données.
 **Limites** : un seul profil local, sans authentification ; le résumé de run reste déclaratif (un client
 modifié pourrait annoncer un faux score — acceptable pour un prototype local, voir § 8).
 
-### 4.6 Déterminisme et testabilité
+### 4.6 Modes de jeu : campagne et mode infini
+
+Le mode infini a été ajouté **sans nouveau système** : il ne fait que *configurer* la run.
+
+- **Stratégie de mode** (`gameplay/modes/gameModes.js`, registre indexé par nom comme les autres) :
+  `configure(content)` renvoie le fournisseur de vagues, la configuration de run (le mode infini y
+  surcharge la courbe d'XP) et `upgradesUncapped`. `new Run({ mode })` l'applique ; le mode est annoncé dans
+  `RUN_STARTED` et recopié dans le résumé `RUN_ENDED`.
+- **Fournisseur de vagues** (`gameplay/waves/`) : le `WaveSystem` ne lit plus un tableau mais une interface
+  `{ total, get(index) }`. `ScriptedWaveProvider` sert `waves.json` (`total = 3`) ; `EndlessWaveProvider`
+  **génère** la vague *n* à la demande (`total = null`), de façon déterministe, à partir de `endless.json` :
+  bassins d'ennemis débloqués progressivement, intervalles qui raccourcissent, ennemis renforcés via le champ
+  `scale` des règles (PV, dégâts, vitesse, XP, score). Toutes les `bossEvery` (10) vagues : une vague de boss
+  (boss tournant entre le Gardien déchu et le Titan abyssal) **plus gros et plus puissant à chaque palier**.
+- **Chrono de boss** : une vague peut déclarer `bossTimeLimit`. À l'apparition du boss, le `WaveSystem` lance
+  un compte à rebours (`BOSS_TIMER_STARTED`, `BOSS_TIMER_TICK` chaque seconde) ; boss tué → `BOSS_TIMER_STOPPED
+  { expired: false }` et la vague suivante commence ; temps écoulé → `{ expired: true }`, que le `RunDirector`
+  transforme en défaite (`cause: 'bossTimeout'`). Le HUD affiche chrono et barre de vie du boss en écoutant
+  ces événements. Le chrono se fige pendant la pause et le choix d'amélioration (la run n'est pas mise à jour).
+- **Améliorations sans limite** : avec `uncapped`, l'`UpgradeSystem` ignore `maxStacks` ; seules les limites
+  absolues `hardMaxStacks` (réduction de recharge plafonnée, vitesse, nombre de projectiles/lames) et les
+  améliorations uniques (`maxStacks: 1`, déblocage d'arme) s'appliquent.
+- **Méta** : récompense bonus par boss vaincu (`config.rewards.endlessBossKillBonus`), statistiques
+  `bestEndlessWave` (record affiché au menu, « nouveau record » en fin de run) et `endlessBossKills`. Le
+  serveur refuse qu'une run infinie soit une « victoire » et borne `bossKills` au nombre de vagues.
+
+Réglage par simulation (`npm run simulate -- --mode=endless`) : l'IA atteint en général la vague 40–60
+(≈ 25–30 min) ; le mur vient à la fois des vagues (PV × 1,03ⁿ) et des boss (PV × 3 par palier).
+
+### 4.7 Déterminisme et testabilité
 
 Le générateur aléatoire (`core/Random.js`, mulberry32) est injecté partout : une même graine rejoue la même
 run (`?seed=42`). La `GameLoop` reçoit son horloge et son planificateur par injection : les tests et la
@@ -372,6 +404,15 @@ Contenu de la run livrée (≈ 2 min 30 à 3 min) : **vague 1** « Les première
 la vague ne se termine qu'à sa mort). Ramassage d'XP, choix parmi 3 améliorations à chaque niveau, score
 final, récompense en éclats, puis boutique permanente dans le menu.
 
+**Écran titre** : les deux modes sont présentés côte à côte (cartes générées à partir des données par
+`app/modeSummaries.js`) ; les améliorations permanentes ont leur **propre état**, `Sanctuary` (Menu ⇄
+Sanctuary), avec son écran `SanctuaryScreen`.
+
+**Mode infini** (carte « L'Ascension sans fin » de l'écran titre, touche I, ou `?autostart=1&mode=endless`) : même boucle, mais les
+vagues de 30 s ne s'arrêtent jamais, un boss géant apparaît toutes les 10 vagues et doit être tué en moins
+de 60 s, les améliorations se cumulent sans plafond. La run se termine à la mort ou à l'expiration du chrono ;
+« Rejouer » relance le même mode.
+
 ---
 
 ## 6. Organisation du dépôt
@@ -385,6 +426,8 @@ Projet-Aegis/
 │       ├── core/                # moteur générique : EventBus, StateMachine, ServiceContainer, GameLoop, Random, math, events
 │       ├── gameplay/            # logique de jeu pure (aucun DOM) : Run, World, Stats, DamageResolver
 │       │   ├── systems/         # 9 systèmes (GameSystem de base)
+│       │   ├── modes/           # stratégies de mode de jeu (campagne, infini)
+│       │   ├── waves/           # fournisseurs de vagues (scénarisé, généré à l'infini)
 │       │   ├── entities/        # Player, EnemyFactory
 │       │   ├── behaviors/       # stratégies de comportement d'ennemi
 │       │   ├── weapons/         # Arsenal, WeaponInstance, types d'armes et ciblage
@@ -415,13 +458,13 @@ Projet-Aegis/
 
 ## 7. Qualité : tests, simulation, historique Git
 
-- `npm test` : **57 tests** `node:test` (aucune dépendance) — bus, machine à états, conteneur, boucle,
+- `npm test` : **82 tests** `node:test` (aucune dépendance) — bus, machine à états, conteneur, boucle,
   chaque système isolé avec des doublures, découplage (run sans chaque système), absence de fuite
   d'abonnements, run complète simulée et déterministe, règles méta, validation des données, API HTTP,
   sécurité du serveur statique (traversée de répertoires), écriture atomique des sauvegardes.
 - `npm run simulate -- --runs=10` : joue des runs entières avec le **vrai code de gameplay** dans Node,
   pilotées par l'`AutopilotInput`. L'équilibrage des vagues a été réglé ainsi (victoire en ≈ 145–360 s selon
-  la graine pour l'IA).
+  la graine pour l'IA). `--mode=endless` fait de même pour le mode infini (arrêt à la mort ou au chrono).
 - Démo navigateur : `?autopilot=1&autostart=1&debug=1&speed=3` — une IA joue, l'overlay montre la pile
   d'états, les systèmes actifs et le débit d'événements.
 - Historique Git : commits atomiques par couche/fonctionnalité, messages conventionnels en français

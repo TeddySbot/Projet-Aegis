@@ -8,6 +8,7 @@
  *   ?disable=score,xp,sfx,fx   désactive des systèmes
  *   ?seed=42                   graine fixe (run reproductible)
  *   ?autopilot=1               une IA joue à votre place (et &autostart=1 lance la run)
+ *   ?mode=endless              avec autostart : lance directement le mode infini
  *   ?debug=1                   overlay d'information (FPS, pile d'états, systèmes)
  *   ?storage=local             force la sauvegarde locale (sans serveur)
  *   ?speed=4                   accélère la simulation (démo / tests end-to-end)
@@ -22,6 +23,7 @@ import { HttpProfileRepository } from './meta/HttpProfileRepository.js';
 import { LocalProfileRepository, MemoryStorage } from './meta/LocalProfileRepository.js';
 import { MetaProgressionService } from './meta/MetaProgressionService.js';
 import { RunSession } from './app/RunSession.js';
+import { describeModes } from './app/modeSummaries.js';
 import { OPTIONAL_SYSTEMS } from './gameplay/Run.js';
 import { CanvasRenderer } from './presentation/CanvasRenderer.js';
 import { FxLayer } from './presentation/FxLayer.js';
@@ -29,10 +31,12 @@ import { Hud } from './presentation/Hud.js';
 import { SfxPlayer } from './presentation/SfxPlayer.js';
 import { DebugOverlay } from './presentation/DebugOverlay.js';
 import { MenuScreen } from './presentation/screens/MenuScreen.js';
+import { SanctuaryScreen } from './presentation/screens/SanctuaryScreen.js';
 import { PauseScreen } from './presentation/screens/PauseScreen.js';
 import { LevelUpScreen } from './presentation/screens/LevelUpScreen.js';
 import { GameOverScreen } from './presentation/screens/GameOverScreen.js';
 import { MenuState } from './states/MenuState.js';
+import { SanctuaryState } from './states/SanctuaryState.js';
 import { PlayingState } from './states/PlayingState.js';
 import { PausedState } from './states/PausedState.js';
 import { LevelUpState } from './states/LevelUpState.js';
@@ -47,6 +51,7 @@ const flags = {
   seed: params.has('seed') ? Number(params.get('seed')) : null,
   autopilot: params.get('autopilot') === '1',
   autostart: params.get('autostart') === '1',
+  mode: params.get('mode') === 'endless' ? 'endless' : 'story',
   debug: params.get('debug') === '1',
   forceLocal: params.get('storage') === 'local',
   speed: Math.min(8, Math.max(1, Number(params.get('speed') ?? 1) || 1)),
@@ -97,7 +102,10 @@ async function boot() {
   c.register('machine', (c) => {
     const deps = { bus: c.resolve('bus'), input: c.resolve('keyboard'), session: c.resolve('session') };
     return new StateMachine({ transitions: STATE_TRANSITIONS, onChange: ({ to }) => (document.body.dataset.state = to) })
-      .register(new MenuState({ ...deps, screen: new MenuScreen({ root: screensRoot }), meta: c.resolve('meta'), hud: c.resolve('hud') }))
+      .register(
+        new MenuState({ ...deps, screen: new MenuScreen({ root: screensRoot }), meta: c.resolve('meta'), hud: c.resolve('hud'), modes: describeModes(content) }),
+      )
+      .register(new SanctuaryState({ ...deps, screen: new SanctuaryScreen({ root: screensRoot }), meta: c.resolve('meta') }))
       .register(new PlayingState({ ...deps, renderer: c.resolve('renderer'), fx: c.resolve('fx'), hud: c.resolve('hud') }))
       .register(new PausedState({ ...deps, screen: new PauseScreen({ root: screensRoot }) }))
       .register(new LevelUpState({ ...deps, screen: new LevelUpScreen({ root: screensRoot }) }))
@@ -129,7 +137,7 @@ async function boot() {
 
   bootEl.remove();
   machine.start('Menu');
-  if (flags.autostart) machine.change('Playing');
+  if (flags.autostart) machine.change('Playing', { mode: flags.mode });
   loop.start();
 
   // Exposé uniquement pour le débogage dans la console / les tests end-to-end.

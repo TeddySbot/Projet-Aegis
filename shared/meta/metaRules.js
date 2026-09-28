@@ -6,6 +6,7 @@
  * le dépôt local de secours côté navigateur. Aucune dépendance au gameplay : la
  * méta ne connaît qu'un « résumé de run » et un catalogue d'améliorations.
  */
+import { GAME_MODES } from '../content/vocabulary.js';
 
 export const PROFILE_VERSION = 1;
 
@@ -15,7 +16,7 @@ export function createEmptyProfile() {
     shards: 0,
     totalShardsEarned: 0,
     upgrades: {},
-    stats: { runs: 0, victories: 0, bestScore: 0, bestTime: 0, totalKills: 0 },
+    stats: { runs: 0, victories: 0, bestScore: 0, bestTime: 0, totalKills: 0, bestEndlessWave: 0, endlessBossKills: 0 },
     lastRun: null,
   };
 }
@@ -50,6 +51,8 @@ export function sanitizeProfile(raw) {
       bestScore: nonNegInt(s.bestScore),
       bestTime: nonNegNum(s.bestTime),
       totalKills: nonNegInt(s.totalKills),
+      bestEndlessWave: nonNegInt(s.bestEndlessWave),
+      endlessBossKills: nonNegInt(s.endlessBossKills),
     },
     lastRun:
       raw.lastRun && typeof raw.lastRun === 'object'
@@ -63,12 +66,18 @@ const OUTCOMES = ['victory', 'defeat', 'abandon'];
 /** Assainit un résumé de run reçu du client. */
 export function sanitizeRunSummary(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
+  const mode = GAME_MODES.includes(r.mode) ? r.mode : 'story';
+  const wave = nonNegInt(r.wave);
   return {
-    outcome: OUTCOMES.includes(r.outcome) ? r.outcome : 'abandon',
+    mode,
+    // une run infinie ne se « gagne » jamais : elle s'arrête par défaite ou abandon
+    outcome: OUTCOMES.includes(r.outcome) && !(mode === 'endless' && r.outcome === 'victory') ? r.outcome : 'abandon',
     score: nonNegInt(r.score),
     kills: nonNegInt(r.kills),
     level: Math.max(1, nonNegInt(r.level)),
-    wave: nonNegInt(r.wave),
+    wave,
+    // au plus un boss par vague atteinte (garde-fou contre un résumé incohérent)
+    bossKills: Math.min(nonNegInt(r.bossKills), wave),
     duration: Math.round(nonNegNum(r.duration) * 10) / 10,
   };
 }
@@ -77,7 +86,8 @@ export function sanitizeRunSummary(raw) {
 export function computeReward(summary, rewards) {
   const base = Math.floor(summary.score * (rewards.shardsPerScore ?? 0));
   const bonus = summary.outcome === 'victory' ? rewards.victoryBonus ?? 0 : 0;
-  const total = base + bonus;
+  const bossBonus = summary.mode === 'endless' ? (summary.bossKills ?? 0) * (rewards.endlessBossKillBonus ?? 0) : 0;
+  const total = base + bonus + bossBonus;
   if (summary.outcome === 'abandon' && summary.duration < 5) return 0;
   return Math.max(total, rewards.minShards ?? 0);
 }
@@ -90,6 +100,7 @@ export function applyRunResult(profile, rawSummary, rewards) {
   const run = sanitizeRunSummary(rawSummary);
   const reward = computeReward(run, rewards);
   const p = sanitizeProfile(profile);
+  const endless = run.mode === 'endless';
   return {
     run,
     reward,
@@ -103,6 +114,8 @@ export function applyRunResult(profile, rawSummary, rewards) {
         bestScore: Math.max(p.stats.bestScore, run.score),
         bestTime: Math.max(p.stats.bestTime, run.duration),
         totalKills: p.stats.totalKills + run.kills,
+        bestEndlessWave: endless ? Math.max(p.stats.bestEndlessWave, run.wave) : p.stats.bestEndlessWave,
+        endlessBossKills: p.stats.endlessBossKills + (endless ? run.bossKills : 0),
       },
       lastRun: { ...run, reward },
     },
@@ -137,19 +150,50 @@ export function purchaseUpgrade(profile, upgradeId, catalog) {
 }
 
 /**
+ * Effets d'une amélioration méta : `effects` (liste) ou `effect` (forme historique à un seul effet).
+ * @returns {any[]}
+ */
+export function metaEffects(meta) {
+  if (Array.isArray(meta?.effects)) return meta.effects;
+  return meta?.effect ? [meta.effect] : [];
+}
+
+/**
+ * Nombre de « paliers » atteints par un effet au niveau `lvl`. Par défaut chaque
+ * niveau compte ; avec `everyLevels: 5`, l'effet ne progresse qu'aux niveaux 5, 10…
+ * (utile pour les stats entières : projectiles, perforation, nombre de lames).
+ */
+export function effectSteps(fx, lvl) {
+  return Math.floor(lvl / (fx.everyLevels ?? 1));
+}
+
+/**
  * Traduit le profil en « modificateurs de run » : c'est la SEULE interface entre
  * méta-progression et gameplay. Le gameplay reçoit des données, pas un service.
- * @returns {{ statModifiers: {stat: string, op: 'add'|'mul', value: number, source: string}[], startingWeapons: string[] }}
+ * @returns {{
+ *   statModifiers: {stat: string, op: 'add'|'mul', value: number, source: string}[],
+ *   startingWeapons: string[],
+ *   weaponModifiers: {weapon: string, stat: string, op: 'add'|'mul', value: number, source: string}[],
+ * }}
  */
 export function computeRunModifiers(profile, catalog) {
   const statModifiers = [];
   const startingWeapons = [];
+  const weaponModifiers = [];
   for (const meta of catalog) {
     const lvl = upgradeLevel(profile, meta.id);
     if (lvl <= 0) continue;
-    const fx = meta.effect;
-    if (fx.type === 'stat') statModifiers.push({ stat: fx.stat, op: fx.op, value: fx.valuePerLevel * lvl, source: meta.id });
-    else if (fx.type === 'startingWeapon') startingWeapons.push(fx.weapon);
+    for (const fx of metaEffects(meta)) {
+      if (fx.type === 'startingWeapon') {
+        startingWeapons.push(fx.weapon);
+        continue;
+      }
+      const steps = effectSteps(fx, lvl);
+      if (steps <= 0) continue; // palier pas encore atteint
+      const value = fx.valuePerLevel * steps;
+      if (fx.type === 'stat') statModifiers.push({ stat: fx.stat, op: fx.op, value, source: meta.id });
+      else if (fx.type === 'weaponStat') weaponModifiers.push({ weapon: fx.weapon, stat: fx.stat, op: fx.op, value, source: meta.id });
+    }
   }
-  return { statModifiers, startingWeapons };
+  return { statModifiers, startingWeapons, weaponModifiers };
 }
