@@ -15,11 +15,11 @@
 
 /** @type {Record<string, (effect: any, ctx: EffectContext, source: string) => void>} */
 export const upgradeEffects = Object.freeze({
-  stat(fx, { player }, source) {
+  stat(fx, { player, heal }, source) {
     const before = player.maxHp;
     player.stats.addModifier({ stat: fx.stat, op: fx.op, value: fx.value, source });
     // Gagner des PV max augmente aussi les PV courants du même montant.
-    if (fx.stat === 'maxHp') player.hp = Math.min(player.maxHp, player.hp + Math.max(0, player.maxHp - before));
+    if (fx.stat === 'maxHp' && player.maxHp > before) heal(player.maxHp - before);
   },
 
   heal(fx, { heal }) {

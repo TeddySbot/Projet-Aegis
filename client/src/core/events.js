@@ -7,7 +7,7 @@
  */
 export const GameEvents = Object.freeze({
   // --- Cycle de vie d'une run ---------------------------------------------
-  /** { seed: number, modifiers: object } */
+  /** { seed, modifiers, disabled: string[], player: { hp, maxHp, weapons: {id, name}[] } } */
   RUN_STARTED: 'run:started',
   /** Résumé de run : { outcome: 'victory'|'defeat'|'abandon', duration, score, kills, level, wave } */
   RUN_ENDED: 'run:ended',
@@ -57,7 +57,7 @@ export const GameEvents = Object.freeze({
   UPGRADE_CHOSEN: 'upgrade:chosen',
   /** { upgrade, stacks } */
   UPGRADE_APPLIED: 'upgrade:applied',
-  /** { weaponId } */
+  /** { weaponId, name } */
   WEAPON_GRANTED: 'weapon:granted',
 
   // --- Score --------------------------------------------------------------

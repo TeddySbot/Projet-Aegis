@@ -19,7 +19,7 @@
     "orbLifetime": 45
   },
   "rewards": {
-    "shardsPerScore": 0.02,
+    "shardsPerScore": 0.004,
     "victoryBonus": 15,
     "minShards": 1
   },

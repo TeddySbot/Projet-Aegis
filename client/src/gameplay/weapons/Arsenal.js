@@ -14,7 +14,7 @@ export class Arsenal {
     const def = this._defs.get(weaponId);
     if (!def) throw new Error(`Arme inconnue : ${weaponId}`);
     player.weapons.set(weaponId, new WeaponInstance(def));
-    this._bus.emit(GameEvents.WEAPON_GRANTED, { weaponId });
+    this._bus.emit(GameEvents.WEAPON_GRANTED, { weaponId, name: def.name });
     return true;
   }
 }

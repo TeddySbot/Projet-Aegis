@@ -113,7 +113,13 @@ export class Run {
 
   /** Démarre la run (les systèmes réagissent à RUN_STARTED, ex : première vague). */
   start() {
-    this.bus.emit(GameEvents.RUN_STARTED, { seed: this._seed, modifiers: this._modifiers, disabled: this.disabled });
+    const p = this.world.player;
+    this.bus.emit(GameEvents.RUN_STARTED, {
+      seed: this._seed,
+      modifiers: this._modifiers,
+      disabled: this.disabled,
+      player: { hp: p.hp, maxHp: p.maxHp, weapons: [...p.weapons.values()].map((w) => ({ id: w.id, name: w.def.name })) },
+    });
   }
 
   get director() {
