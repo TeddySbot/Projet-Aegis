@@ -11,6 +11,7 @@
 import {
   ENEMY_BEHAVIORS,
   WEAPON_KINDS,
+  WEAPON_TARGETING,
   UPGRADE_EFFECT_TYPES,
   META_EFFECT_TYPES,
   MODIFIER_OPS,
@@ -86,6 +87,9 @@ export function validateContent(content) {
     weaponIds = uniqueIds(e, 'weapons', weapons);
     weapons.forEach((w, i) => {
       requireFields(e, `weapons[${i}]`, w, { name: [isStr, 'texte'], kind: [(v) => WEAPON_KINDS.includes(v), `un de ${WEAPON_KINDS.join('|')}`], stats: [isObj, 'objet'] });
+      if (w?.targeting !== undefined && !WEAPON_TARGETING.includes(w.targeting)) {
+        e.add(`weapons[${i}].targeting`, `un de ${WEAPON_TARGETING.join('|')}`);
+      }
       if (isObj(w?.stats)) {
         for (const [k, v] of Object.entries(w.stats)) if (!isNum(v)) e.add(`weapons[${i}].stats.${k}`, 'nombre attendu');
       }

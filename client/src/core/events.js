@@ -9,16 +9,16 @@ export const GameEvents = Object.freeze({
   // --- Cycle de vie d'une run ---------------------------------------------
   /** { seed: number, modifiers: object } */
   RUN_STARTED: 'run:started',
-  /** { outcome: 'victory'|'defeat'|'abandon', duration: number } */
+  /** Résumé de run : { outcome: 'victory'|'defeat'|'abandon', duration, score, kills, level, wave } */
   RUN_ENDED: 'run:ended',
-  /** Résumé agrégé, prêt pour l'UI et la méta : { outcome, duration, score, kills, level, wave } */
-  RUN_SUMMARY_READY: 'run:summary-ready',
   /** { elapsed: number } — émis chaque seconde de jeu */
   RUN_TICK: 'run:tick',
 
   // --- Vagues ------------------------------------------------------------
   /** { index: number, total: number, wave: WaveDef } */
   WAVE_STARTED: 'wave:started',
+  /** { enemy } */
+  BOSS_SPAWNED: 'wave:boss-spawned',
   /** { index: number } */
   WAVE_COMPLETED: 'wave:completed',
   /** {} — toutes les vagues ont été survécues */
@@ -31,8 +31,10 @@ export const GameEvents = Object.freeze({
   ENEMY_DAMAGED: 'enemy:damaged',
   /** { enemy, typeId, x, y, xp, score } */
   ENEMY_KILLED: 'enemy:killed',
-  /** { weaponId, x, y } */
+  /** { weaponId, kind, x, y, radius?, color } */
   WEAPON_FIRED: 'weapon:fired',
+  /** { enemy } — un ennemi à charge prépare son attaque (télégraphie) */
+  ENEMY_TELEGRAPH: 'enemy:telegraph',
 
   // --- Joueur ------------------------------------------------------------
   /** { amount, hp, maxHp } */
@@ -55,6 +57,8 @@ export const GameEvents = Object.freeze({
   UPGRADE_CHOSEN: 'upgrade:chosen',
   /** { upgrade, stacks } */
   UPGRADE_APPLIED: 'upgrade:applied',
+  /** { weaponId } */
+  WEAPON_GRANTED: 'weapon:granted',
 
   // --- Score --------------------------------------------------------------
   /** { score, delta } */
