@@ -141,3 +141,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# --- Aegis ---
+# Sauvegardes locales de la méta-progression (générées à l'exécution)
+saves/
+# Artefacts de build (exe Windows, bundle)
+dist/

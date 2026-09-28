@@ -1,0 +1,5 @@
+# Normalise les fins de ligne (dépôt développé sous Windows et Linux)
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.exe binary
