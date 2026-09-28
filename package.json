@@ -14,5 +14,9 @@
     "simulate": "node tools/simulate-run.js",
     "validate-data": "node tools/validate-data.js",
     "build:win": "node tools/build-win.js"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.22.0",
+    "esbuild": "^0.28.2"
   }
 }
