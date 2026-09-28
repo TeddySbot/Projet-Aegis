@@ -7,6 +7,7 @@
  *
  * Options : --runs=N  --seed=S  --disable=score,xp  --verbose
  */
+import path from 'node:path';
 import { ContentRepository } from '../server/content/ContentRepository.js';
 import { DATA_DIR } from '../server/paths.js';
 import { EventBus } from '../client/src/core/EventBus.js';
@@ -69,8 +70,8 @@ export function simulateRun({ content, seed, disabled = [], maxSeconds = 600, ve
   })();
 }
 
-const isMain = process.argv[1] && import.meta.url === new URL(`file://${process.argv[1].replace(/\\/g, '/')}`).href;
-if (isMain || process.argv[1]?.endsWith('simulate-run.js')) {
+const isMain = path.basename(process.argv[1] ?? '') === 'simulate-run.js';
+if (isMain) {
   const content = await new ContentRepository({ dataDir: DATA_DIR }).load();
   const runs = Number(args.runs ?? 5);
   const baseSeed = Number(args.seed ?? 1);
