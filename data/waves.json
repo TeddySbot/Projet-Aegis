@@ -1,0 +1,36 @@
+{
+  "waves": [
+    {
+      "id": "wave_1",
+      "name": "Les premières ombres",
+      "duration": 40,
+      "spawns": [
+        { "enemy": "shade", "interval": 1.1, "intervalEnd": 0.55, "batch": 2 },
+        { "enemy": "wisp", "interval": 3.5, "intervalEnd": 2.0, "batch": 2, "start": 15 }
+      ]
+    },
+    {
+      "id": "wave_2",
+      "name": "La meute",
+      "duration": 50,
+      "spawns": [
+        { "enemy": "shade", "interval": 0.7, "intervalEnd": 0.35, "batch": 2 },
+        { "enemy": "wisp", "interval": 1.8, "intervalEnd": 1.0, "batch": 3 },
+        { "enemy": "charger", "interval": 4.5, "intervalEnd": 2.5, "batch": 1, "start": 8 },
+        { "enemy": "brute", "interval": 9, "intervalEnd": 6, "batch": 1, "start": 20 }
+      ]
+    },
+    {
+      "id": "wave_3",
+      "name": "Le Gardien déchu",
+      "duration": 55,
+      "requiresBossKill": true,
+      "spawns": [
+        { "enemy": "warden", "at": 10, "count": 1 },
+        { "enemy": "shade", "interval": 0.6, "intervalEnd": 0.4, "batch": 3 },
+        { "enemy": "charger", "interval": 3.5, "intervalEnd": 2.0, "batch": 2 },
+        { "enemy": "brute", "interval": 8, "intervalEnd": 5, "batch": 1 }
+      ]
+    }
+  ]
+}

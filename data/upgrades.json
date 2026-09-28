@@ -1,0 +1,139 @@
+[
+  {
+    "id": "might",
+    "name": "Puissance",
+    "description": "+15 % de dégâts.",
+    "icon": "⚔",
+    "weight": 10,
+    "maxStacks": 5,
+    "effects": [{ "type": "stat", "stat": "might", "op": "mul", "value": 0.15 }]
+  },
+  {
+    "id": "haste",
+    "name": "Célérité",
+    "description": "-8 % de temps de recharge des armes.",
+    "icon": "⏱",
+    "weight": 8,
+    "maxStacks": 5,
+    "effects": [{ "type": "stat", "stat": "cooldownReduction", "op": "add", "value": 0.08 }]
+  },
+  {
+    "id": "swift_boots",
+    "name": "Bottes véloces",
+    "description": "+10 % de vitesse de déplacement.",
+    "icon": "👟",
+    "weight": 7,
+    "maxStacks": 4,
+    "effects": [{ "type": "stat", "stat": "moveSpeed", "op": "mul", "value": 0.1 }]
+  },
+  {
+    "id": "vitality",
+    "name": "Vitalité",
+    "description": "+20 PV max et soigne de 20.",
+    "icon": "❤",
+    "weight": 8,
+    "maxStacks": 5,
+    "effects": [
+      { "type": "stat", "stat": "maxHp", "op": "add", "value": 20 },
+      { "type": "heal", "amount": 20 }
+    ]
+  },
+  {
+    "id": "multishot",
+    "name": "Tir multiple",
+    "description": "+1 projectile pour les armes à projectiles.",
+    "icon": "➶",
+    "weight": 5,
+    "maxStacks": 3,
+    "effects": [{ "type": "stat", "stat": "extraProjectiles", "op": "add", "value": 1 }]
+  },
+  {
+    "id": "magnet",
+    "name": "Aimant",
+    "description": "+40 % de rayon de ramassage d'XP.",
+    "icon": "🧲",
+    "weight": 6,
+    "maxStacks": 3,
+    "effects": [{ "type": "stat", "stat": "pickupRadius", "op": "mul", "value": 0.4 }]
+  },
+  {
+    "id": "scholar",
+    "name": "Érudition",
+    "description": "+15 % d'expérience gagnée.",
+    "icon": "📖",
+    "weight": 5,
+    "maxStacks": 3,
+    "effects": [{ "type": "stat", "stat": "xpGain", "op": "mul", "value": 0.15 }]
+  },
+  {
+    "id": "precision",
+    "name": "Précision",
+    "description": "+8 % de chances de coup critique.",
+    "icon": "🎯",
+    "weight": 5,
+    "maxStacks": 4,
+    "effects": [{ "type": "stat", "stat": "critChance", "op": "add", "value": 0.08 }]
+  },
+  {
+    "id": "regeneration",
+    "name": "Régénération",
+    "description": "Régénère 1 PV par seconde.",
+    "icon": "✚",
+    "weight": 4,
+    "maxStacks": 3,
+    "effects": [{ "type": "stat", "stat": "regen", "op": "add", "value": 1 }]
+  },
+  {
+    "id": "unlock_orbit_blades",
+    "name": "Lames orbitales",
+    "description": "Nouvelle arme : deux lames tournent autour de vous.",
+    "icon": "✦",
+    "weight": 6,
+    "maxStacks": 1,
+    "requires": { "missingWeapon": "orbit_blades" },
+    "effects": [{ "type": "grantWeapon", "weapon": "orbit_blades" }]
+  },
+  {
+    "id": "orbit_more_blades",
+    "name": "Lames supplémentaires",
+    "description": "+1 lame orbitale.",
+    "icon": "✧",
+    "weight": 6,
+    "maxStacks": 3,
+    "requires": { "weapon": "orbit_blades" },
+    "effects": [{ "type": "weaponStat", "weapon": "orbit_blades", "stat": "count", "op": "add", "value": 1 }]
+  },
+  {
+    "id": "unlock_nova",
+    "name": "Nova d'Égide",
+    "description": "Nouvelle arme : onde de choc périodique autour de vous.",
+    "icon": "✺",
+    "weight": 5,
+    "maxStacks": 1,
+    "requires": { "missingWeapon": "nova" },
+    "effects": [{ "type": "grantWeapon", "weapon": "nova" }]
+  },
+  {
+    "id": "nova_amplify",
+    "name": "Nova amplifiée",
+    "description": "+30 % de rayon et de dégâts de la Nova.",
+    "icon": "✹",
+    "weight": 5,
+    "maxStacks": 3,
+    "requires": { "weapon": "nova" },
+    "effects": [
+      { "type": "weaponStat", "weapon": "nova", "stat": "radius", "op": "mul", "value": 0.3 },
+      { "type": "weaponStat", "weapon": "nova", "stat": "damage", "op": "mul", "value": 0.3 }
+    ]
+  },
+  {
+    "id": "bolt_pierce",
+    "name": "Traits perforants",
+    "description": "Les traits arcaniques transpercent 1 ennemi de plus.",
+    "icon": "➹",
+    "weight": 5,
+    "maxStacks": 3,
+    "requires": { "weapon": "arcane_bolt" },
+    "effects": [{ "type": "weaponStat", "weapon": "arcane_bolt", "stat": "pierce", "op": "add", "value": 1 }]
+  }
+]

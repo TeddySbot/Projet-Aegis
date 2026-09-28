@@ -1,0 +1,20 @@
+{
+  "radius": 14,
+  "color": "#5ee7ff",
+  "baseStats": {
+    "maxHp": 100,
+    "moveSpeed": 190,
+    "might": 1,
+    "cooldownReduction": 0,
+    "area": 1,
+    "projectileSpeed": 1,
+    "extraProjectiles": 0,
+    "pickupRadius": 70,
+    "xpGain": 1,
+    "armor": 0,
+    "regen": 0,
+    "critChance": 0.05,
+    "critMultiplier": 2
+  },
+  "startingWeapons": ["arcane_bolt"]
+}

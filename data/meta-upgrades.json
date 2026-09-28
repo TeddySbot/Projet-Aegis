@@ -1,0 +1,44 @@
+[
+  {
+    "id": "meta_vitality",
+    "name": "Constitution",
+    "description": "+10 PV max au début de chaque run.",
+    "costs": [5, 10, 20, 35, 55],
+    "effect": { "type": "stat", "stat": "maxHp", "op": "add", "valuePerLevel": 10 }
+  },
+  {
+    "id": "meta_might",
+    "name": "Entraînement",
+    "description": "+5 % de dégâts.",
+    "costs": [8, 16, 30, 50],
+    "effect": { "type": "stat", "stat": "might", "op": "mul", "valuePerLevel": 0.05 }
+  },
+  {
+    "id": "meta_swiftness",
+    "name": "Agilité",
+    "description": "+4 % de vitesse de déplacement.",
+    "costs": [6, 14, 28],
+    "effect": { "type": "stat", "stat": "moveSpeed", "op": "mul", "valuePerLevel": 0.04 }
+  },
+  {
+    "id": "meta_greed",
+    "name": "Avidité",
+    "description": "+10 % d'expérience gagnée.",
+    "costs": [10, 25, 45],
+    "effect": { "type": "stat", "stat": "xpGain", "op": "mul", "valuePerLevel": 0.1 }
+  },
+  {
+    "id": "meta_armor",
+    "name": "Carapace",
+    "description": "-1 dégât subi par coup.",
+    "costs": [12, 30],
+    "effect": { "type": "stat", "stat": "armor", "op": "add", "valuePerLevel": 1 }
+  },
+  {
+    "id": "meta_orbit_start",
+    "name": "Héritage des lames",
+    "description": "Commence chaque run avec les Lames orbitales.",
+    "costs": [40],
+    "effect": { "type": "startingWeapon", "weapon": "orbit_blades" }
+  }
+]

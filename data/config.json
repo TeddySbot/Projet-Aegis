@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "run": {
+    "upgradeChoices": 3,
+    "xpCurve": { "base": 5, "growth": 1.35, "flat": 2 },
+    "maxEnemies": 260,
+    "spawnRadius": { "min": 560, "max": 720 },
+    "despawnRadius": 1500,
+    "invulnerabilityAfterHit": 0.45,
+    "survivalScorePerSecond": 2,
+    "victoryScoreBonus": 750,
+    "orbLifetime": 45
+  },
+  "rewards": {
+    "shardsPerScore": 0.02,
+    "victoryBonus": 15,
+    "minShards": 1
+  },
+  "systems": {
+    "sfx": true,
+    "floatingText": true,
+    "screenShake": true
+  }
+}

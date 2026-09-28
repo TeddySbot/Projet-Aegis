@@ -1,0 +1,68 @@
+[
+  {
+    "id": "shade",
+    "name": "Ombre",
+    "behavior": "chase",
+    "color": "#ef476f",
+    "hp": 14,
+    "speed": 72,
+    "damage": 8,
+    "radius": 12,
+    "xp": 1,
+    "score": 10
+  },
+  {
+    "id": "wisp",
+    "name": "Feu follet",
+    "behavior": "zigzag",
+    "behaviorParams": { "amplitude": 0.9, "frequency": 3 },
+    "color": "#ff9f1c",
+    "hp": 8,
+    "speed": 125,
+    "damage": 5,
+    "radius": 9,
+    "xp": 1,
+    "score": 12
+  },
+  {
+    "id": "charger",
+    "name": "Chargeur",
+    "behavior": "charge",
+    "behaviorParams": { "range": 280, "windup": 0.6, "chargeSpeed": 360, "chargeDuration": 0.65, "cooldown": 2.2 },
+    "color": "#06d6a0",
+    "hp": 26,
+    "speed": 58,
+    "damage": 14,
+    "radius": 14,
+    "xp": 2,
+    "score": 25
+  },
+  {
+    "id": "brute",
+    "name": "Colosse",
+    "behavior": "chase",
+    "color": "#9b5de5",
+    "hp": 75,
+    "speed": 44,
+    "damage": 18,
+    "radius": 22,
+    "xp": 5,
+    "score": 45,
+    "knockbackResistance": 0.7
+  },
+  {
+    "id": "warden",
+    "name": "Gardien déchu",
+    "behavior": "charge",
+    "behaviorParams": { "range": 420, "windup": 0.9, "chargeSpeed": 420, "chargeDuration": 0.8, "cooldown": 3.2 },
+    "color": "#f15bb5",
+    "hp": 1100,
+    "speed": 62,
+    "damage": 28,
+    "radius": 40,
+    "xp": 40,
+    "score": 1500,
+    "boss": true,
+    "knockbackResistance": 0.95
+  }
+]
