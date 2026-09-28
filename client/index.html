@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aegis — prototype rogue-lite</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 93,28 93,72 50,95 7,72 7,28' fill='%235ee7ff'/></svg>" />
+    <link rel="stylesheet" href="/client/styles.css" />
+  </head>
+  <body data-state="Boot">
+    <canvas id="game" aria-label="Arène de jeu"></canvas>
+    <div id="hud" hidden></div>
+    <div id="screens"></div>
+    <div id="boot">Chargement des données…</div>
+    <script type="module" src="/client/src/main.js"></script>
+  </body>
+</html>
